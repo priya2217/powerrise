@@ -9,24 +9,22 @@ export default function Home() {
       <img src={logo} alt="logo" style={{ height: "80px" }} />
       <h1>Welcome to PowerRise Fitness</h1>
       <p>Your personal fitness companion 💪</p>
-     
-      <div className="hero">
-        <h1>Welcome to PowerRise Fitness</h1>
-        <p>Your personal fitness companion 💪</p>
-      </div>
 
       <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
         <Link to="/profile">
-          <button>Go to Profile</button>
+          <button className="gradient-btn">Go to Profile</button>
         </Link>
         <Link to="/exercises">
-          <button>Exercise Library</button>
+          <button className="gradient-btn">Exercise Library</button>
         </Link>
         <Link to="/plan">
-          <button>Workout Plan</button>
+          <button className="gradient-btn">Workout Plan</button>
         </Link>
         <Link to="/timer">
-          <button>Workout Timer</button>
+          <button className="gradient-btn">Workout Timer</button>
+        </Link>
+        <Link to="/dashboard">
+          <button className="gradient-btn">Dashboard</button>
         </Link>
       </div>
     </div>

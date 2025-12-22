@@ -1,36 +1,55 @@
 import { useEffect, useState } from "react";
 
 export default function WorkoutTimer() {
-  const [time, setTime] = useState(60);
+  const [minutes, setMinutes] = useState(30); // start at 30 minutes
+  const [secondsLeft, setSecondsLeft] = useState(minutes * 60);
   const [isRunning, setIsRunning] = useState(false);
 
+  // Update every second while running
   useEffect(() => {
-    let interval;
-    if (isRunning && time > 0) {
+    let interval = null;
+
+    if (isRunning && secondsLeft > 0) {
       interval = setInterval(() => {
-        setTime((t) => t - 1);
+        setSecondsLeft((prev) => prev - 1);
       }, 1000);
+    } else {
+      clearInterval(interval);
     }
+
     return () => clearInterval(interval);
-  }, [isRunning, time]);
+  }, [isRunning, secondsLeft]);
+
+  // Calculate “minutes:seconds”
+  const displayMinutes = Math.floor(secondsLeft / 60);
+  const displaySeconds = secondsLeft % 60;
 
   const handleReset = () => {
-    setTime(60);
     setIsRunning(false);
+    setSecondsLeft(minutes * 60); // reset timer
   };
 
   return (
-    <>
-      <div className="header green">Workout Timer</div>
-      <div className="container">
-        <h1>{time} seconds</h1>
-        <button onClick={() => setIsRunning(!isRunning)}>
-          {isRunning ? "Pause" : "Start"}
+    <div className="container timer-page">
+      <div className="timer-header">Workout Timer</div>
+
+      <div className="timer-display">
+        {displayMinutes}:
+        {displaySeconds < 10 ? `0${displaySeconds}` : displaySeconds} minutes
+      </div>
+
+      <div className="timer-controls">
+        <button
+          className="gradient-btn"
+          onClick={() => setIsRunning(!isRunning)}
+        >
+          {isRunning ? "Pause Timer" : "Start Timer"}
         </button>
-        <button onClick={handleReset} style={{ marginLeft: "10px" }}>
+
+        <button className="gradient-btn reset-btn" onClick={handleReset}>
           Reset Timer
         </button>
       </div>
-    </>
+    </div>
   );
 }

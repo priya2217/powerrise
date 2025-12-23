@@ -5,11 +5,9 @@ export default function Dashboard() {
   const [exercises, setExercises] = useState([]);
 
   useEffect(() => {
-    // Load profile
     const savedProfile = localStorage.getItem("profile");
     if (savedProfile) setProfile(JSON.parse(savedProfile));
 
-    // Load exercises
     const savedExercises = localStorage.getItem("exercises");
     if (savedExercises) setExercises(JSON.parse(savedExercises));
   }, []);
@@ -20,61 +18,78 @@ export default function Dashboard() {
     if (!profile) return null;
     const heightMeters = profile.height / 100;
     if (!heightMeters || !profile.weight) return null;
-    const bmi = (profile.weight / (heightMeters * heightMeters)).toFixed(1);
-    return bmi;
+    return (profile.weight / (heightMeters * heightMeters)).toFixed(1);
   };
 
   const bmi = getBMI();
 
+  const bmiStatus = () => {
+    if (!bmi) return "--";
+    if (bmi < 18.5) return "Underweight";
+    if (bmi < 25) return "Normal";
+    if (bmi < 30) return "Overweight";
+    return "Obese";
+  };
+
   return (
-    <div className="container dashboard">
-      <h2>Dashboard</h2>
+    <div className="dashboard-container">
+      <h1 className="dashboard-title">🏠 Dashboard</h1>
 
-      {/* Profile Summary */}
-      {profile ? (
-        <div className="card">
-          <h3>Welcome, {profile.name}</h3>
-          <p>
-            Age: {profile.age} • Height: {profile.height} cm • Weight:{" "}
-            {profile.weight} kg
-          </p>
-          {bmi && (
+      {/* Profile Card */}
+      <div className="dashboard-card">
+        <h3>👤 Profile</h3>
+        {profile ? (
+          <>
             <p>
-              <strong>Your BMI:</strong> {bmi}
+              <b>Name:</b> {profile.name}
             </p>
-          )}
-        </div>
-      ) : (
-        <p>No profile saved yet.</p>
-      )}
-
-      {/* Exercise Summary */}
-      <div className="card">
-        <h3>Exercise Summary</h3>
-        <p>Total Exercises: {countExercises}</p>
+            <p>
+              <b>Age:</b> {profile.age}
+            </p>
+            <p>
+              <b>Height:</b> {profile.height} cm
+            </p>
+            <p>
+              <b>Weight:</b> {profile.weight} kg
+            </p>
+          </>
+        ) : (
+          <p className="muted">No profile saved yet.</p>
+        )}
       </div>
 
-      {/* Quick Navigation */}
-      <div className="card nav-cards">
-        <h3>Quick Actions</h3>
-        <button
-          className="gradient-btn"
-          onClick={() => (window.location = "/exercises")}
-        >
-          View Exercises
-        </button>
-        <button
-          className="gradient-btn"
-          onClick={() => (window.location = "/plan")}
-        >
-          Workout Plan
-        </button>
-        <button
-          className="gradient-btn"
-          onClick={() => (window.location = "/timer")}
-        >
-          Timer
-        </button>
+      {/* Stats */}
+      <div className="stats-row">
+        <div className="stat-box">
+          <h4>🏋 Exercises</h4>
+          <p className="stat-number">{countExercises}</p>
+        </div>
+
+        <div className="stat-box">
+          <h4>📊 BMI</h4>
+          <p className="stat-number">{bmi || "--"}</p>
+        </div>
+
+        <div className="stat-box">
+          <h4>📌 Status</h4>
+          <p className="stat-number">{bmiStatus()}</p>
+        </div>
+      </div>
+
+      {/* Quick Actions */}
+      <div className="dashboard-card">
+        <h3>⚡ Quick Actions</h3>
+        <div className="action-row">
+          <button onClick={() => (window.location = "/exercises")}>
+            🏃 Manage Exercises
+          </button>
+          <button onClick={() => (window.location = "/plan")}>
+            🗓 Workout Plan
+          </button>
+          <button onClick={() => (window.location = "/timer")}>
+            ⏱ Start Timer
+          </button>
+        </div>
       </div>
     </div>
   );

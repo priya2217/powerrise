@@ -1,91 +1,209 @@
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
+import {
+  FaMoon,
+  FaBell,
+  FaUserLock,
+  FaEnvelope,
+  FaVolumeUp,
+  FaSignOutAlt,
+  FaLanguage,
+  FaTrash,
+} from "react-icons/fa";
 
 export default function Settings() {
   const [settings, setSettings] = useState({
-    notifications: false,
     darkMode: false,
-    showProfilePublic: true,
+    notifications: false,
+    publicProfile: true,
+    emailUpdates: true,
+    soundEffects: true,
+    autoLogout: false,
+    language: "English",
   });
 
-  // Load from localStorage
+  // Load saved settings
   useEffect(() => {
     const saved = localStorage.getItem("appSettings");
     if (saved) setSettings(JSON.parse(saved));
   }, []);
 
-  const handleChange = (e) => {
-    const { name, checked } = e.target;
-    setSettings({ ...settings, [name]: checked });
+  // Apply dark mode
+  useEffect(() => {
+    document.body.style.backgroundColor = settings.darkMode
+      ? "#0f172a"
+      : "#f9fafb";
+  }, [settings.darkMode]);
+
+  const toggle = (key) => {
+    setSettings((prev) => ({ ...prev, [key]: !prev[key] }));
   };
 
-  const handleSave = () => {
+  const handleChange = (e) => {
+    setSettings({ ...settings, [e.target.name]: e.target.value });
+  };
+
+  const saveSettings = () => {
     localStorage.setItem("appSettings", JSON.stringify(settings));
-    alert("Settings saved!");
+    alert("Settings saved successfully!");
+  };
+
+  const clearData = () => {
+    if (window.confirm("This will clear all app data. Continue?")) {
+      localStorage.clear();
+      window.location.reload();
+    }
   };
 
   return (
-    <div className="container settings-page">
-      <h1>Settings</h1>
+    <div style={{ padding: "40px" }}>
+      <h1 style={{ fontSize: "32px", fontWeight: "700", color: "#4f46e5" }}>
+        Settings
+      </h1>
 
-      {/* Account Section */}
-      <div className="settings-section">
-        <h2>Account</h2>
-        <p>Manage your account details and preferences.</p>
-        
-      </div>
+      <SettingRow
+        icon={<FaMoon />}
+        label="Dark Mode"
+        value={settings.darkMode}
+        onClick={() => toggle("darkMode")}
+      />
 
-      {/* Display */}
-      <div className="settings-section">
-        <h2>Display</h2>
-        <div className="field toggle">
-          <label>
-            <input
-              type="checkbox"
-              name="darkMode"
-              checked={settings.darkMode}
-              onChange={handleChange}
-            />{" "}
-            Enable Dark Mode
-          </label>
+      <SettingRow
+        icon={<FaBell />}
+        label="Notifications"
+        value={settings.notifications}
+        onClick={() => toggle("notifications")}
+      />
+
+      <SettingRow
+        icon={<FaUserLock />}
+        label="Public Profile"
+        value={settings.publicProfile}
+        onClick={() => toggle("publicProfile")}
+      />
+
+      <SettingRow
+        icon={<FaEnvelope />}
+        label="Email Updates"
+        value={settings.emailUpdates}
+        onClick={() => toggle("emailUpdates")}
+      />
+
+      <SettingRow
+        icon={<FaVolumeUp />}
+        label="Sound Effects"
+        value={settings.soundEffects}
+        onClick={() => toggle("soundEffects")}
+      />
+
+      <SettingRow
+        icon={<FaSignOutAlt />}
+        label="Auto Logout"
+        value={settings.autoLogout}
+        onClick={() => toggle("autoLogout")}
+      />
+
+      {/* Language */}
+      <div style={rowStyle}>
+        <div style={{ display: "flex", gap: "15px", alignItems: "center" }}>
+          <FaLanguage style={{ color: "#4f46e5", fontSize: "22px" }} />
+          <strong>Language</strong>
         </div>
+        <select
+          name="language"
+          value={settings.language}
+          onChange={handleChange}
+          style={{
+            padding: "8px",
+            borderRadius: "10px",
+            border: "1px solid #d1d5db",
+          }}
+        >
+          <option>English</option>
+          <option>Tamil</option>
+          <option>Hindi</option>
+        </select>
       </div>
 
-      {/* Notifications */}
-      <div className="settings-section">
-        <h2>Notifications</h2>
-        <div className="field toggle">
-          <label>
-            <input
-              type="checkbox"
-              name="notifications"
-              checked={settings.notifications}
-              onChange={handleChange}
-            />{" "}
-            Allow Push Notifications
-          </label>
-        </div>
+      {/* Danger */}
+      <div style={{ marginTop: "30px" }}>
+        <button
+          onClick={clearData}
+          style={{
+            padding: "14px",
+            borderRadius: "18px",
+            background: "linear-gradient(to right, #ef4444, #dc2626)",
+            color: "#fff",
+            border: "none",
+            cursor: "pointer",
+            width: "300px",
+          }}
+        >
+          <FaTrash /> Clear App Data
+        </button>
       </div>
 
-      {/* Privacy */}
-      <div className="settings-section">
-        <h2>Privacy</h2>
-        <div className="field toggle">
-          <label>
-            <input
-              type="checkbox"
-              name="showProfilePublic"
-              checked={settings.showProfilePublic}
-              onChange={handleChange}
-            />{" "}
-            Show my profile publicly
-          </label>
-        </div>
-      </div>
-
-      {/* Save */}
-      <button className="gradient-btn settings-save-btn" onClick={handleSave}>
+      <button
+        onClick={saveSettings}
+        style={{
+          marginTop: "40px",
+          width: "300px",
+          padding: "14px",
+          borderRadius: "20px",
+          fontWeight: "600",
+          background: "linear-gradient(to right, #34d399, #14b8a6)",
+          color: "#fff",
+          border: "none",
+          cursor: "pointer",
+        }}
+      >
         Save Settings
       </button>
+    </div>
+  );
+}
+
+const rowStyle = {
+  width: "400px",
+  marginTop: "20px",
+  padding: "18px",
+  borderRadius: "18px",
+  background: "#fff",
+  boxShadow: "0 8px 20px rgba(0,0,0,0.08)",
+  display: "flex",
+  justifyContent: "space-between",
+  alignItems: "center",
+};
+
+function SettingRow({ icon, label, value, onClick }) {
+  return (
+    <div style={rowStyle} onClick={onClick}>
+      <div style={{ display: "flex", gap: "15px", alignItems: "center" }}>
+        <span style={{ fontSize: "22px", color: "#4f46e5" }}>{icon}</span>
+        <strong>{label}</strong>
+      </div>
+
+      <div
+        style={{
+          width: "46px",
+          height: "24px",
+          borderRadius: "999px",
+          background: value ? "#34d399" : "#d1d5db",
+          position: "relative",
+        }}
+      >
+        <div
+          style={{
+            width: "20px",
+            height: "20px",
+            borderRadius: "50%",
+            background: "#fff",
+            position: "absolute",
+            top: "2px",
+            left: value ? "24px" : "2px",
+            transition: "all 0.3s",
+          }}
+        />
+      </div>
     </div>
   );
 }

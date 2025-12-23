@@ -9,6 +9,9 @@ import ExerciseLibrary from "./pages/ExerciseLibrary";
 import WorkoutPlan from "./pages/WorkoutPlan";
 import WorkoutTimer from "./pages/WorkoutTimer";
 import Settings from "./pages/Settings";
+import BMICalculator from "./pages/BMICalculator";
+import './index.css'; // or './app.css' if you renamed it
+
 
 import "./App.css";
 
@@ -54,6 +57,7 @@ export default function App() {
               <NavLink to="/exercises">Exercises</NavLink>
               <NavLink to="/plan">Plan</NavLink>
               <NavLink to="/timer">Timer</NavLink>
+              <NavLink to="/BMICalculator">BMICalculator</NavLink>
               <NavLink to="/settings">Settings</NavLink>
               <NavLink to="/dashboard">Dashboard</NavLink>
 
@@ -89,21 +93,19 @@ export default function App() {
       <main>
         <Routes>
           <Route path="/" element={<Home />} />
-
           {/* Auth routes */}
           <Route
             path="/login"
             element={<Login setCurrentUser={setCurrentUser} />}
           />
           <Route path="/signup" element={<Signup />} />
-
           {/* Protected pages (optional: block if not logged in) */}
           <Route path="/dashboard" element={<Dashboard />} />
-
           <Route path="/profile" element={<Profile />} />
           <Route path="/exercises" element={<ExerciseLibrary />} />
           <Route path="/plan" element={<WorkoutPlan />} />
           <Route path="/timer" element={<WorkoutTimer />} />
+          <Route path="/BMICalculator" element={<BMICalculator />} />;
           <Route path="/settings" element={<Settings />} />
         </Routes>
       </main>

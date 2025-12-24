@@ -1,9 +1,5 @@
-import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
-
-export default function Profile() {
+export function Profile() {
   const [isEditing, setIsEditing] = useState(false);
-
   const [profile, setProfile] = useState({
     name: "",
     age: "",
@@ -14,7 +10,6 @@ export default function Profile() {
 
   const navigate = useNavigate();
 
-  // Load profile
   useEffect(() => {
     const saved = localStorage.getItem("profile");
     if (saved) setProfile(JSON.parse(saved));
@@ -25,7 +20,6 @@ export default function Profile() {
     setProfile({ ...profile, [name]: value });
   };
 
-  // Upload image
   const handlePhotoUpload = (e) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -37,7 +31,6 @@ export default function Profile() {
     reader.readAsDataURL(file);
   };
 
-  // Remove image
   const removePhoto = () => {
     setProfile({ ...profile, photo: null });
   };
@@ -48,13 +41,11 @@ export default function Profile() {
     alert("Profile saved!");
   };
 
-  // Logout function
   const handleLogout = () => {
     localStorage.removeItem("profile");
     navigate("/login");
   };
 
-  // Avatar initials
   const initials =
     profile.name
       ?.split(" ")
@@ -67,7 +58,6 @@ export default function Profile() {
       <h1 style={titleStyle}>My Profile</h1>
 
       <div style={cardStyle}>
-        {/* Profile Photo / Avatar */}
         <div style={{ textAlign: "center" }}>
           {profile.photo ? (
             <img src={profile.photo} alt="Profile" style={photoStyle} />
@@ -81,7 +71,7 @@ export default function Profile() {
                 type="file"
                 accept="image/*"
                 onChange={handlePhotoUpload}
-                style={{ marginTop: "10px" }}
+                style={{ marginTop: "10px", fontSize: "14px" }}
               />
 
               {profile.photo && (
@@ -93,7 +83,6 @@ export default function Profile() {
           )}
         </div>
 
-        {/* Info */}
         <div style={infoStyle}>
           {isEditing ? (
             <>
@@ -147,7 +136,6 @@ export default function Profile() {
           )}
         </div>
 
-        {/* Buttons */}
         <div style={buttonRow}>
           {isEditing ? (
             <button style={saveBtn} onClick={handleSave}>
@@ -159,9 +147,13 @@ export default function Profile() {
             </button>
           )}
 
-          {/* Logout Button */}
           <button
-            style={{ ...editBtn, background: "#ef4444", marginLeft: "10px" }}
+            style={{
+              ...editBtn,
+              background: "#ef4444",
+              marginLeft: "10px",
+              marginTop: "10px",
+            }}
             onClick={handleLogout}
           >
             Logout
@@ -172,45 +164,45 @@ export default function Profile() {
   );
 }
 
-/* ---------- STYLES ---------- */
 const pageStyle = {
-  width: "100vw",
+  width: "100%",
   minHeight: "100vh",
   background: "#f3f4f6",
-  padding: "50px",
+  padding: "20px",
 };
 
 const titleStyle = {
   textAlign: "center",
-  fontSize: "34px",
+  fontSize: "clamp(24px, 5vw, 34px)",
   color: "#4f46e5",
   marginBottom: "30px",
 };
 
 const cardStyle = {
-  width: "600px",
+  width: "100%",
+  maxWidth: "600px",
   margin: "auto",
   background: "#fff",
-  padding: "30px",
+  padding: "20px",
   borderRadius: "24px",
   boxShadow: "0 12px 30px rgba(0,0,0,0.1)",
 };
 
 const photoStyle = {
-  width: "150px",
-  height: "150px",
+  width: "clamp(100px, 25vw, 150px)",
+  height: "clamp(100px, 25vw, 150px)",
   borderRadius: "50%",
   objectFit: "cover",
   border: "4px solid #6366f1",
 };
 
 const avatarStyle = {
-  width: "150px",
-  height: "150px",
+  width: "clamp(100px, 25vw, 150px)",
+  height: "clamp(100px, 25vw, 150px)",
   borderRadius: "50%",
   background: "linear-gradient(135deg, #6366f1, #14b8a6)",
   color: "white",
-  fontSize: "48px",
+  fontSize: "clamp(32px, 8vw, 48px)",
   fontWeight: "bold",
   display: "flex",
   alignItems: "center",
@@ -229,11 +221,16 @@ const inputStyle = {
   padding: "12px",
   borderRadius: "14px",
   border: "1px solid #d1d5db",
+  width: "100%",
 };
 
 const buttonRow = {
   marginTop: "25px",
   textAlign: "center",
+  display: "flex",
+  flexWrap: "wrap",
+  gap: "10px",
+  justifyContent: "center",
 };
 
 const editBtn = {
@@ -244,6 +241,8 @@ const editBtn = {
   fontWeight: "bold",
   border: "none",
   cursor: "pointer",
+  flex: "1 1 auto",
+  minWidth: "120px",
 };
 
 const saveBtn = {
@@ -254,6 +253,8 @@ const saveBtn = {
   fontWeight: "bold",
   border: "none",
   cursor: "pointer",
+  flex: "1 1 auto",
+  minWidth: "120px",
 };
 
 const removeBtn = {

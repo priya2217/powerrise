@@ -64,10 +64,10 @@ export default function ExerciseLibrary() {
   return (
     <div
       style={{
-        width: "100vw",
+        width: "100%",
         minHeight: "100vh",
         backgroundColor: "#f9fafb",
-        padding: "40px",
+        padding: "20px",
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
@@ -75,10 +75,11 @@ export default function ExerciseLibrary() {
     >
       <h2
         style={{
-          fontSize: "32px",
+          fontSize: "clamp(24px, 5vw, 32px)",
           fontWeight: "700",
           color: "#4f46e5",
           marginBottom: "30px",
+          textAlign: "center",
         }}
       >
         Exercise Library
@@ -91,9 +92,10 @@ export default function ExerciseLibrary() {
       {/* Form */}
       <div
         style={{
-          width: "600px",
+          width: "100%",
+          maxWidth: "600px",
           backgroundColor: "#fff",
-          padding: "30px",
+          padding: "20px",
           borderRadius: "20px",
           boxShadow: "0 8px 25px rgba(0,0,0,0.1)",
           marginBottom: "50px",
@@ -110,6 +112,7 @@ export default function ExerciseLibrary() {
               borderRadius: "12px",
               border: "1px solid #d1d5db",
               outline: "none",
+              width: "100%",
             }}
           />
           <input
@@ -122,6 +125,7 @@ export default function ExerciseLibrary() {
               borderRadius: "12px",
               border: "1px solid #d1d5db",
               outline: "none",
+              width: "100%",
             }}
           />
           <textarea
@@ -135,6 +139,7 @@ export default function ExerciseLibrary() {
               border: "1px solid #d1d5db",
               outline: "none",
               minHeight: "80px",
+              width: "100%",
             }}
           />
           <input
@@ -148,6 +153,7 @@ export default function ExerciseLibrary() {
               borderRadius: "12px",
               border: "1px solid #d1d5db",
               outline: "none",
+              width: "100%",
             }}
           />
           <input
@@ -160,6 +166,7 @@ export default function ExerciseLibrary() {
               borderRadius: "12px",
               border: "1px solid #d1d5db",
               outline: "none",
+              width: "100%",
             }}
           />
 
@@ -174,6 +181,8 @@ export default function ExerciseLibrary() {
               cursor: "pointer",
               boxShadow: "0 4px 15px rgba(0,0,0,0.2)",
               transition: "all 0.3s",
+              border: "none",
+              width: "100%",
             }}
             onMouseOver={(e) =>
               (e.currentTarget.style.transform = "scale(1.05)")
@@ -188,10 +197,11 @@ export default function ExerciseLibrary() {
       {/* Exercise List */}
       <h3
         style={{
-          fontSize: "24px",
+          fontSize: "clamp(20px, 4vw, 24px)",
           fontWeight: "600",
           color: "#4f46e5",
           marginBottom: "20px",
+          textAlign: "center",
         }}
       >
         Existing Exercises
@@ -201,7 +211,8 @@ export default function ExerciseLibrary() {
       ) : (
         <div
           style={{
-            width: "600px",
+            width: "100%",
+            maxWidth: "600px",
             display: "flex",
             flexDirection: "column",
             gap: "15px",
@@ -216,32 +227,40 @@ export default function ExerciseLibrary() {
                 borderRadius: "16px",
                 boxShadow: "0 6px 20px rgba(0,0,0,0.1)",
                 display: "flex",
+                flexDirection: window.innerWidth < 480 ? "column" : "row",
                 justifyContent: "space-between",
-                alignItems: "flex-start",
+                alignItems: window.innerWidth < 480 ? "stretch" : "flex-start",
+                gap: "15px",
               }}
             >
-              <div>
+              <div style={{ flex: 1 }}>
                 <h4
                   style={{
                     fontWeight: "700",
-                    fontSize: "18px",
+                    fontSize: "clamp(16px, 3vw, 18px)",
                     color: "#4f46e5",
                   }}
                 >
                   {ex.name}
                 </h4>
-                <p style={{ color: "#6b7280" }}>
+                <p style={{ color: "#6b7280", fontSize: "14px" }}>
                   {ex.category} - {ex.duration} min
                 </p>
                 {ex.description && (
-                  <p style={{ color: "#9ca3af" }}>{ex.description}</p>
+                  <p style={{ color: "#9ca3af", fontSize: "14px" }}>
+                    {ex.description}
+                  </p>
                 )}
                 {ex.video_url && (
                   <a
                     href={ex.video_url}
                     target="_blank"
                     rel="noreferrer"
-                    style={{ color: "#14b8a6", textDecoration: "underline" }}
+                    style={{
+                      color: "#14b8a6",
+                      textDecoration: "underline",
+                      fontSize: "14px",
+                    }}
                   >
                     Watch Video
                   </a>
@@ -258,6 +277,9 @@ export default function ExerciseLibrary() {
                   cursor: "pointer",
                   boxShadow: "0 4px 10px rgba(0,0,0,0.15)",
                   transition: "all 0.3s",
+                  border: "none",
+                  whiteSpace: "nowrap",
+                  alignSelf: window.innerWidth < 480 ? "stretch" : "flex-start",
                 }}
                 onMouseOver={(e) =>
                   (e.currentTarget.style.transform = "scale(1.05)")

@@ -1,8 +1,5 @@
 # PowerRise – Fitness Tracking Application
 
-![React](https://img.shields.io/badge/React-18+-blue)
-![Tailwind CSS](https://img.shields.io/badge/TailwindCSS-3+-teal)
-![Status](https://img.shields.io/badge/Status-Active-success)
 
 PowerRise is a modern fitness tracking web application designed to help users monitor their workouts, calculate BMI, and track overall fitness progress through a clean and user‑friendly interface.
 

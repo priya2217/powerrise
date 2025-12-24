@@ -1,16 +1,86 @@
-# React + Vite
+# PowerRise – Fitness Tracking Application
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+![React](https://img.shields.io/badge/React-18+-blue)
+![Tailwind CSS](https://img.shields.io/badge/TailwindCSS-3+-teal)
+![Status](https://img.shields.io/badge/Status-Active-success)
 
-Currently, two official plugins are available:
+PowerRise is a modern fitness tracking web application designed to help users monitor their workouts, calculate BMI, and track overall fitness progress through a clean and user‑friendly interface.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## 🚀 Features
 
-## React Compiler
+* Clean, portfolio-ready fitness application
+* User authentication (Signup & Login)
+* Personalized fitness dashboard
+* BMI calculator with health status
+* Workout and activity tracking
+* Progress visualization
+* Responsive and modern UI
+* Secure local data handling (can be extended to backend)
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## 🛠️ Tech Stack
 
-## Expanding the ESLint configuration
+* **Frontend:** React.js
+* **Styling:** Tailwind CSS
+* **Routing:** React Router
+* **State Management:** React Hooks
+* **Icons:** React Icons
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+## 📂 Project Structure
+
+* `src/components` – Reusable UI components
+* `src/pages` – Application pages (Home, Signup, Dashboard, etc.)
+* `src/assets` – Images and static resources
+* `src/styles` – Custom styles (if any)
+
+## ⚙️ Installation & Setup
+
+> Prerequisites: Node.js (v16+) and npm
+
+1. Clone the repository
+
+   ```bash
+   git clone https://github.com/your-username/powerrise.git
+   ```
+2. Navigate to the project folder
+
+   ```bash
+   cd powerrise
+   ```
+3. Install dependencies
+
+   ```bash
+   npm install
+   ```
+4. Run the application
+
+   ```bash
+   npm start
+   ```
+
+The app will run on `http://localhost:3000`
+
+## 🎯 Purpose
+
+PowerRise was developed as a personal project to strengthen skills in frontend development, UI/UX design, and fitness‑focused application logic.
+
+## 📌 Future Enhancements
+
+* Backend integration (Node.js / .NET / Supabase)
+* User profile management
+* Advanced analytics & charts
+* Cloud database support
+* Mobile app version
+
+## 👩‍💻 Author
+
+**Priya K**
+Software / Web Developer
+
+* GitHub: [https://github.com/your-username](https://github.com/your-username)
+* LinkedIn: [https://linkedin.com/in](https://linkedin.com/in)
+  **Priya K**
+  Aspiring Software / Web Developer
+
+## 📄 License
+
+This project is for educational and portfolio purposes.

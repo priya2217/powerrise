@@ -73,8 +73,8 @@ PowerRise was developed as a personal project to strengthen skills in frontend d
 **Priya K**
 Software / Web Developer
 
-* GitHub: [https://github.com/your-username](https://github.com/your-username)
-* LinkedIn: [https://linkedin.com/in](https://linkedin.com/in)
+* GitHub: [[https://github.com/priya2217](https://github.com/priya2217)
+* LinkedIn: [https://linkedin.com/in/priya-k-497439267](https://www.linkedin.com/in/priya-k-497439267/)
   **Priya K**
   Aspiring Software / Web Developer
 

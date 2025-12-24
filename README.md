@@ -75,7 +75,7 @@ Software / Web Developer
 
 * GitHub: [[https://github.com/priya2217](https://github.com/priya2217)
 * LinkedIn: [https://linkedin.com/in/priya-k-497439267](https://www.linkedin.com/in/priya-k-497439267/)
-* *Portfolio: [https://priya2217-portfolio.netlify.app](https://priya2217-portfolio.netlify.app/)
+* Portfolio: [https://priya2217-portfolio.netlify.app](https://priya2217-portfolio.netlify.app/)
 
 
   **Priya K**

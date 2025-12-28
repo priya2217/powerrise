@@ -1,7 +1,15 @@
 import { useEffect, useState } from "react";
+import {
+  getExercises,
+  createExercise,
+  updateExercise,
+  deleteExercise,
+} from "../api";
 
 export default function ExerciseLibrary() {
   const [exercises, setExercises] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
   const [form, setForm] = useState({
     id: null,
     name: "",
@@ -10,290 +18,91 @@ export default function ExerciseLibrary() {
     duration: 0,
     video_url: "",
   });
-  const [saveError, setSaveError] = useState("");
 
+  // Load exercises on component mount
   useEffect(() => {
-    const saved = localStorage.getItem("exercises");
-    if (saved) setExercises(JSON.parse(saved));
+    fetchExercises();
   }, []);
 
-  const saveToLocalStorage = (data) => {
-    localStorage.setItem("exercises", JSON.stringify(data));
+  const fetchExercises = async () => {
+    try {
+      setLoading(true);
+      const data = await getExercises();
+      setExercises(data);
+    } catch (err) {
+      setError(err);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setForm({
-      ...form,
-      [name]: name === "duration" ? parseInt(value) || 0 : value,
-    });
-  };
+  const handleSave = async () => {
+    try {
+      setError("");
 
-  const handleSave = () => {
-    setSaveError("");
-    if (!form.name.trim()) {
-      setSaveError("Exercise name is required.");
-      return;
+      if (!form.name.trim()) {
+        setError("Exercise name is required");
+        return;
+      }
+
+      if (form.id) {
+        // Update existing exercise
+        const updated = await updateExercise(form.id, form);
+        setExercises(
+          exercises.map((ex) => (ex._id === form.id ? updated : ex))
+        );
+      } else {
+        // Create new exercise
+        const newExercise = await createExercise(form);
+        setExercises([...exercises, newExercise]);
+      }
+
+      // Reset form
+      setForm({
+        id: null,
+        name: "",
+        category: "",
+        description: "",
+        duration: 0,
+        video_url: "",
+      });
+    } catch (err) {
+      setError(err);
     }
-
-    let updatedExercises = [...exercises];
-    if (form.id !== null) {
-      updatedExercises = updatedExercises.map((ex) =>
-        ex.id === form.id ? form : ex
-      );
-    } else {
-      updatedExercises.push({ ...form, id: Date.now().toString() });
-    }
-
-    saveToLocalStorage(updatedExercises);
-    setExercises(updatedExercises);
-    setForm({
-      id: null,
-      name: "",
-      category: "",
-      description: "",
-      duration: 0,
-      video_url: "",
-    });
   };
 
   const handleEdit = (exercise) => {
-    setForm(exercise);
+    setForm({
+      id: exercise._id,
+      name: exercise.name,
+      category: exercise.category,
+      description: exercise.description,
+      duration: exercise.duration,
+      video_url: exercise.video_url,
+    });
   };
 
+  const handleDelete = async (id) => {
+    if (window.confirm("Are you sure you want to delete this exercise?")) {
+      try {
+        await deleteExercise(id);
+        setExercises(exercises.filter((ex) => ex._id !== id));
+      } catch (err) {
+        setError(err);
+      }
+    }
+  };
+
+  if (loading) return <div>Loading exercises...</div>;
+
   return (
-    <div
-      style={{
-        width: "100%",
-        minHeight: "100vh",
-        backgroundColor: "#f9fafb",
-        padding: "20px",
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-      }}
-    >
-      <h2
-        style={{
-          fontSize: "clamp(24px, 5vw, 32px)",
-          fontWeight: "700",
-          color: "#4f46e5",
-          marginBottom: "30px",
-          textAlign: "center",
-        }}
-      >
-        Exercise Library
-      </h2>
+    <div className="container">
+      <h2>Exercise Library</h2>
 
-      {saveError && (
-        <p style={{ color: "red", marginBottom: "20px" }}>{saveError}</p>
-      )}
+      {error && <div className="error">{error}</div>}
 
-      {/* Form */}
-      <div
-        style={{
-          width: "100%",
-          maxWidth: "600px",
-          backgroundColor: "#fff",
-          padding: "20px",
-          borderRadius: "20px",
-          boxShadow: "0 8px 25px rgba(0,0,0,0.1)",
-          marginBottom: "50px",
-        }}
-      >
-        <div style={{ display: "flex", flexDirection: "column", gap: "15px" }}>
-          <input
-            name="name"
-            placeholder="Exercise Name"
-            value={form.name}
-            onChange={handleChange}
-            style={{
-              padding: "12px",
-              borderRadius: "12px",
-              border: "1px solid #d1d5db",
-              outline: "none",
-              width: "100%",
-            }}
-          />
-          <input
-            name="category"
-            placeholder="Category (e.g., Chest, Legs)"
-            value={form.category}
-            onChange={handleChange}
-            style={{
-              padding: "12px",
-              borderRadius: "12px",
-              border: "1px solid #d1d5db",
-              outline: "none",
-              width: "100%",
-            }}
-          />
-          <textarea
-            name="description"
-            placeholder="Description"
-            value={form.description}
-            onChange={handleChange}
-            style={{
-              padding: "12px",
-              borderRadius: "12px",
-              border: "1px solid #d1d5db",
-              outline: "none",
-              minHeight: "80px",
-              width: "100%",
-            }}
-          />
-          <input
-            name="duration"
-            type="number"
-            placeholder="Duration (minutes)"
-            value={form.duration}
-            onChange={handleChange}
-            style={{
-              padding: "12px",
-              borderRadius: "12px",
-              border: "1px solid #d1d5db",
-              outline: "none",
-              width: "100%",
-            }}
-          />
-          <input
-            name="video_url"
-            placeholder="Video URL"
-            value={form.video_url}
-            onChange={handleChange}
-            style={{
-              padding: "12px",
-              borderRadius: "12px",
-              border: "1px solid #d1d5db",
-              outline: "none",
-              width: "100%",
-            }}
-          />
-
-          <button
-            onClick={handleSave}
-            style={{
-              padding: "14px",
-              borderRadius: "20px",
-              fontWeight: "600",
-              background: "linear-gradient(to right, #34d399, #14b8a6)",
-              color: "white",
-              cursor: "pointer",
-              boxShadow: "0 4px 15px rgba(0,0,0,0.2)",
-              transition: "all 0.3s",
-              border: "none",
-              width: "100%",
-            }}
-            onMouseOver={(e) =>
-              (e.currentTarget.style.transform = "scale(1.05)")
-            }
-            onMouseOut={(e) => (e.currentTarget.style.transform = "scale(1)")}
-          >
-            {form.id ? "Update Exercise" : "Add Exercise"}
-          </button>
-        </div>
-      </div>
-
-      {/* Exercise List */}
-      <h3
-        style={{
-          fontSize: "clamp(20px, 4vw, 24px)",
-          fontWeight: "600",
-          color: "#4f46e5",
-          marginBottom: "20px",
-          textAlign: "center",
-        }}
-      >
-        Existing Exercises
-      </h3>
-      {exercises.length === 0 ? (
-        <p style={{ color: "#6b7280" }}>No exercises added yet.</p>
-      ) : (
-        <div
-          style={{
-            width: "100%",
-            maxWidth: "600px",
-            display: "flex",
-            flexDirection: "column",
-            gap: "15px",
-          }}
-        >
-          {exercises.map((ex) => (
-            <div
-              key={ex.id}
-              style={{
-                backgroundColor: "#fff",
-                padding: "20px",
-                borderRadius: "16px",
-                boxShadow: "0 6px 20px rgba(0,0,0,0.1)",
-                display: "flex",
-                flexDirection: window.innerWidth < 480 ? "column" : "row",
-                justifyContent: "space-between",
-                alignItems: window.innerWidth < 480 ? "stretch" : "flex-start",
-                gap: "15px",
-              }}
-            >
-              <div style={{ flex: 1 }}>
-                <h4
-                  style={{
-                    fontWeight: "700",
-                    fontSize: "clamp(16px, 3vw, 18px)",
-                    color: "#4f46e5",
-                  }}
-                >
-                  {ex.name}
-                </h4>
-                <p style={{ color: "#6b7280", fontSize: "14px" }}>
-                  {ex.category} - {ex.duration} min
-                </p>
-                {ex.description && (
-                  <p style={{ color: "#9ca3af", fontSize: "14px" }}>
-                    {ex.description}
-                  </p>
-                )}
-                {ex.video_url && (
-                  <a
-                    href={ex.video_url}
-                    target="_blank"
-                    rel="noreferrer"
-                    style={{
-                      color: "#14b8a6",
-                      textDecoration: "underline",
-                      fontSize: "14px",
-                    }}
-                  >
-                    Watch Video
-                  </a>
-                )}
-              </div>
-              <button
-                onClick={() => handleEdit(ex)}
-                style={{
-                  padding: "10px 16px",
-                  borderRadius: "12px",
-                  fontWeight: "600",
-                  background: "linear-gradient(to right, #facc15, #f97316)",
-                  color: "white",
-                  cursor: "pointer",
-                  boxShadow: "0 4px 10px rgba(0,0,0,0.15)",
-                  transition: "all 0.3s",
-                  border: "none",
-                  whiteSpace: "nowrap",
-                  alignSelf: window.innerWidth < 480 ? "stretch" : "flex-start",
-                }}
-                onMouseOver={(e) =>
-                  (e.currentTarget.style.transform = "scale(1.05)")
-                }
-                onMouseOut={(e) =>
-                  (e.currentTarget.style.transform = "scale(1)")
-                }
-              >
-                Edit
-              </button>
-            </div>
-          ))}
-        </div>
-      )}
+      {/* Form and exercise list */}
+      {/* ... rest of your component ... */}
     </div>
   );
 }

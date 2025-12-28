@@ -7,9 +7,11 @@ export default function Signup() {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [terms, setTerms] = useState(false);
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  const handleSignup = () => {
+  const handleSignup = async () => {
+    // Basic validation
     if (!name || !email || !password || !confirmPassword) {
       alert("Please fill all fields!");
       return;
@@ -23,18 +25,29 @@ export default function Signup() {
       return;
     }
 
-    const stored = localStorage.getItem("users");
-    const users = stored ? JSON.parse(stored) : [];
+    try {
+      setLoading(true);
 
-    if (users.some((u) => u.email === email)) {
-      alert("User already exists!");
-      return;
+      const res = await fetch("/api/signup", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, email, password }),
+      });
+
+      const data = await res.json();
+
+      if (res.ok && data.success) {
+        alert("Account created! You can now log in.");
+        navigate("/login");
+      } else {
+        alert(data.message || "Signup failed!");
+      }
+    } catch (error) {
+      console.error(error);
+      alert("Something went wrong. Try again!");
+    } finally {
+      setLoading(false);
     }
-
-    users.push({ name, email, password });
-    localStorage.setItem("users", JSON.stringify(users));
-    alert("Account created! You can now log in.");
-    navigate("/login");
   };
 
   return (
@@ -143,17 +156,20 @@ export default function Signup() {
 
         <button
           onClick={handleSignup}
+          disabled={loading}
           style={{
             width: "100%",
             padding: "12px",
             borderRadius: "20px",
-            background: "linear-gradient(to right, #34d399, #14b8a6)",
+            background: loading
+              ? "#94f3e4"
+              : "linear-gradient(to right, #34d399, #14b8a6)",
             color: "white",
             fontWeight: "bold",
             cursor: "pointer",
           }}
         >
-          Sign Up
+          {loading ? "Creating account..." : "Sign Up"}
         </button>
 
         <p

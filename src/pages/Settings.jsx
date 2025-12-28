@@ -9,6 +9,7 @@ import {
   FaLanguage,
   FaTrash,
 } from "react-icons/fa";
+import { getSettings, saveSettings as saveSettingsAPI } from "../api"; // create these in api/settings.js
 
 export default function Settings() {
   const [settings, setSettings] = useState({
@@ -21,10 +22,21 @@ export default function Settings() {
     language: "English",
   });
 
-  // Load saved settings
+  const [loading, setLoading] = useState(true);
+
+  // Fetch settings from backend on mount
   useEffect(() => {
-    const saved = localStorage.getItem("appSettings");
-    if (saved) setSettings(JSON.parse(saved));
+    const fetchSettings = async () => {
+      try {
+        const data = await getSettings();
+        if (data) setSettings(data);
+      } catch (err) {
+        console.error("Failed to fetch settings:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchSettings();
   }, []);
 
   // Apply dark mode
@@ -42,17 +54,24 @@ export default function Settings() {
     setSettings({ ...settings, [e.target.name]: e.target.value });
   };
 
-  const saveSettings = () => {
-    localStorage.setItem("appSettings", JSON.stringify(settings));
-    alert("Settings saved successfully!");
+  const saveSettings = async () => {
+    try {
+      await saveSettingsAPI(settings);
+      alert("Settings saved successfully!");
+    } catch (err) {
+      console.error(err);
+      alert("Failed to save settings");
+    }
   };
 
-  const clearData = () => {
+  const clearData = async () => {
     if (window.confirm("This will clear all app data. Continue?")) {
       localStorage.clear();
       window.location.reload();
     }
   };
+
+  if (loading) return <div style={{ padding: "40px" }}>Loading...</div>;
 
   return (
     <div style={{ padding: "40px" }}>

@@ -1,15 +1,29 @@
 import { useEffect, useState } from "react";
+import { getProfile, getExercises } from "../api";
 
 export default function Dashboard() {
   const [profile, setProfile] = useState(null);
   const [exercises, setExercises] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
   useEffect(() => {
-    const savedProfile = localStorage.getItem("profile");
-    if (savedProfile) setProfile(JSON.parse(savedProfile));
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        const profileData = await getProfile();
+        setProfile(profileData);
 
-    const savedExercises = localStorage.getItem("exercises");
-    if (savedExercises) setExercises(JSON.parse(savedExercises));
+        const exercisesData = await getExercises();
+        setExercises(exercisesData);
+      } catch (err) {
+        setError(err || "Failed to load dashboard data");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
   }, []);
 
   const countExercises = exercises.length;
@@ -30,6 +44,9 @@ export default function Dashboard() {
     if (bmi < 30) return "Overweight";
     return "Obese";
   };
+
+  if (loading) return <div>Loading dashboard...</div>;
+  if (error) return <div className="error">{error}</div>;
 
   return (
     <div className="dashboard-container">

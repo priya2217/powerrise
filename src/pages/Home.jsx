@@ -1,112 +1,127 @@
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import logo from "../assets/logo.png";
-import {
-  FaDumbbell,
-  FaClipboardList,
-  FaStopwatch,
-  FaChartLine,
-  FaUser,
-  FaCog,
-  FaHeartbeat,
-} from "react-icons/fa";
+import { useAuth } from "../context/AuthContext";
 
-export default function Home() {
+export default function Login() {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
   const navigate = useNavigate();
+  const { login } = useAuth();
 
-  const buttons = [
-    {
-      name: "Exercise Library",
-      path: "/exercises",
-      icon: <FaDumbbell />,
-      gradient: "from-green-400 to-teal-500",
-    },
-    {
-      name: "Workout Plan",
-      path: "/plan",
-      icon: <FaClipboardList />,
-      gradient: "from-yellow-400 to-orange-500",
-    },
-    {
-      name: "Workout Timer",
-      path: "/timer",
-      icon: <FaStopwatch />,
-      gradient: "from-red-400 to-pink-500",
-    },
-    {
-      name: "BMICalculator",
-      path: "/BMICalculator",
-      icon: <FaHeartbeat />,
-      gradient: "from-red-300 to-orange-700",
-    },
-    {
-      name: "Dashboard",
-      path: "/dashboard",
-      icon: <FaChartLine />,
-      gradient: "from-indigo-500 to-purple-600",
-    },
-    {
-      name: "Profile",
-      path: "/profile",
-      icon: <FaUser />,
-      gradient: "from-blue-400 to-purple-500",
-    },
-    {
-      name: "Settings",
-      path: "/settings",
-      icon: <FaCog />,
-      gradient: "from-green-300 to-purple-700",
-    },
-  ];
+  const handleLogin = async () => {
+    if (!email || !password) {
+      setError("Please fill all fields!");
+      return;
+    }
+
+    try {
+      setLoading(true);
+      setError("");
+      await login({ email, password }); // Calls backend login API
+      navigate("/dashboard"); // Redirect after successful login
+    } catch (err) {
+      setError(err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
-    <div className="relative min-h-screen flex flex-col items-center bg-gradient-to-b from-purple-50 via-white to-gray-50 overflow-hidden">
-      {/* Background Blobs */}
-      <div className="absolute top-0 left-0 w-80 h-80 bg-purple-300 rounded-full blur-3xl opacity-30 animate-blob"></div>
-      <div className="absolute top-10 right-0 w-72 h-72 bg-pink-300 rounded-full blur-3xl opacity-30 animate-blob animation-delay-2000"></div>
-      <div className="absolute bottom-0 left-1/3 w-80 h-80 bg-green-300 rounded-full blur-3xl opacity-30 animate-blob animation-delay-4000"></div>
+    <div
+      style={{
+        width: "100vw",
+        height: "100vh",
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+        backgroundColor: "#f3f4f6",
+      }}
+    >
+      <div
+        style={{
+          width: "400px",
+          padding: "40px",
+          backgroundColor: "#fff",
+          borderRadius: "16px",
+          boxShadow: "0 10px 25px rgba(0,0,0,0.1)",
+        }}
+      >
+        <h2
+          style={{
+            textAlign: "center",
+            fontSize: "28px",
+            fontWeight: "700",
+            marginBottom: "25px",
+            color: "#4f46e5",
+          }}
+        >
+          Login
+        </h2>
 
-      {/* Logo */}
-      <img
-        src={logo}
-        alt="PowerRise Logo"
-        className="h-28 mt-12 mb-6 rounded-full shadow-2xl border-4 border-white z-10"
-      />
-
-      {/* Title */}
-      <h1 className="text-5xl font-extrabold text-indigo-700 mb-2 text-center z-10">
-        PowerRise Fitness
-      </h1>
-      <p className="text-lg text-gray-600 italic mb-12 text-center z-10">
-        Your personal fitness companion 💪
-      </p>
-
-      {/* Button Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8 z-10">
-        {buttons.map((btn) => (
-          <button
-            key={btn.name}
-            onClick={() => navigate(btn.path)}
-            className={`w-56 h-32 rounded-3xl bg-gradient-to-r ${btn.gradient} text-white shadow-2xl hover:scale-110 transition-transform duration-300 flex flex-col items-center justify-center gap-3 font-bold`}
+        {error && (
+          <p
+            style={{ color: "red", textAlign: "center", marginBottom: "10px" }}
           >
-            <span className="text-3xl">{btn.icon}</span>
-            <span className="text-lg">{btn.name}</span>
-          </button>
-        ))}
-      </div>
+            {error}
+          </p>
+        )}
 
-      {/* Tailwind Animations for blobs */}
-      <style>
-        {`
-          @keyframes blob {
-            0%, 100% { transform: translate(0,0) scale(1); }
-            33% { transform: translate(30px,-50px) scale(1.1); }
-            66% { transform: translate(-20px,20px) scale(0.9); }
-          }
-          .animate-blob { animation: blob 10s infinite; }
-          .animation-delay-2000 { animation-delay: 2s; }
-          .animation-delay-4000 { animation-delay: 4s; }
-        `}
-      </style>
+        <input
+          type="email"
+          placeholder="Email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          style={{
+            width: "100%",
+            padding: "12px",
+            marginBottom: "15px",
+            borderRadius: "8px",
+            border: "1px solid #d1d5db",
+          }}
+        />
+        <input
+          type="password"
+          placeholder="Password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          style={{
+            width: "100%",
+            padding: "12px",
+            marginBottom: "20px",
+            borderRadius: "8px",
+            border: "1px solid #d1d5db",
+          }}
+        />
+
+        <button
+          onClick={handleLogin}
+          disabled={loading}
+          style={{
+            width: "100%",
+            padding: "12px",
+            borderRadius: "12px",
+            background: "linear-gradient(to right, #34d399, #14b8a6)",
+            color: "white",
+            fontWeight: "600",
+            cursor: "pointer",
+            marginBottom: "15px",
+          }}
+        >
+          {loading ? "Logging in..." : "Login"}
+        </button>
+
+        <p style={{ textAlign: "center", fontSize: "14px", color: "#6b7280" }}>
+          Don't have an account?{" "}
+          <a
+            href="/signup"
+            style={{ color: "#4f46e5", textDecoration: "underline" }}
+          >
+            Sign Up
+          </a>
+        </p>
+      </div>
     </div>
   );
 }

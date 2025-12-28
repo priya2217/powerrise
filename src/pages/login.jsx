@@ -1,30 +1,31 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const { login } = useAuth();
 
-  const handleLogin = () => {
+  const handleLogin = async () => {
     if (!email || !password) {
-      alert("Please fill all fields!");
+      setError("Please fill all fields!");
       return;
     }
 
-    const stored = localStorage.getItem("users");
-    const users = stored ? JSON.parse(stored) : [];
-
-    const user = users.find(
-      (u) => u.email === email && u.password === password
-    );
-    if (!user) {
-      alert("Invalid credentials!");
-      return;
+    try {
+      setLoading(true);
+      setError("");
+      await login({ email, password }); // Call backend API
+      navigate("/dashboard"); // Redirect after login
+    } catch (err) {
+      setError(err || "Login failed");
+    } finally {
+      setLoading(false);
     }
-
-    alert("Login successful!");
-    navigate("/"); // or wherever you want to redirect
   };
 
   return (
@@ -59,6 +60,14 @@ export default function Login() {
           Login
         </h2>
 
+        {error && (
+          <p
+            style={{ color: "red", textAlign: "center", marginBottom: "10px" }}
+          >
+            {error}
+          </p>
+        )}
+
         <input
           type="email"
           placeholder="Email"
@@ -88,6 +97,7 @@ export default function Login() {
 
         <button
           onClick={handleLogin}
+          disabled={loading}
           style={{
             width: "100%",
             padding: "12px",
@@ -99,7 +109,7 @@ export default function Login() {
             marginBottom: "15px",
           }}
         >
-          Login
+          {loading ? "Logging in..." : "Login"}
         </button>
 
         <p style={{ textAlign: "center", fontSize: "14px", color: "#6b7280" }}>

@@ -8,15 +8,22 @@ export default function WorkoutPlan() {
     duration: "",
     exercises: "",
   });
+  const [loading, setLoading] = useState(false);
 
-  // Load saved plans
+  // Load saved plans from API
   useEffect(() => {
-    const saved = localStorage.getItem("workoutPlans");
-    if (saved) setPlans(JSON.parse(saved));
+    fetchPlans();
   }, []);
 
-  const saveToLocalStorage = (data) => {
-    localStorage.setItem("workoutPlans", JSON.stringify(data));
+  const fetchPlans = async () => {
+    try {
+      const res = await fetch("/api/workout-plans");
+      const data = await res.json();
+      if (res.ok) setPlans(data);
+    } catch (err) {
+      console.error(err);
+      alert("Failed to fetch plans");
+    }
   };
 
   const handleChange = (e) => {
@@ -24,41 +31,48 @@ export default function WorkoutPlan() {
     setForm({ ...form, [name]: value });
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!form.name || !form.duration || !form.exercises) {
       alert("Please fill all fields");
       return;
     }
 
-    let updatedPlans = [...plans];
+    try {
+      setLoading(true);
 
-    if (form.id) {
-      updatedPlans = updatedPlans.map((p) => (p.id === form.id ? form : p));
-    } else {
-      updatedPlans.push({ ...form, id: Date.now().toString() });
+      const method = form.id ? "PUT" : "POST";
+      const url = form.id
+        ? `/api/workout-plans/${form.id}`
+        : "/api/workout-plans";
+
+      const res = await fetch(url, {
+        method,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(form),
+      });
+
+      const data = await res.json();
+
+      if (res.ok) {
+        fetchPlans(); // Refresh list
+        setForm({ id: null, name: "", duration: "", exercises: "" });
+      } else {
+        alert(data.message || "Failed to save plan");
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Something went wrong!");
+    } finally {
+      setLoading(false);
     }
-
-    setPlans(updatedPlans);
-    saveToLocalStorage(updatedPlans);
-
-    setForm({ id: null, name: "", duration: "", exercises: "" });
   };
 
-  const handleEdit = (plan) => {
-    setForm(plan);
-  };
+  const handleEdit = (plan) => setForm(plan);
 
   return (
-    <div
-      style={{
-        minHeight: "100vh",
-        padding: "40px",
-        background: "#f9fafb",
-      }}
-    >
+    <div style={{ minHeight: "100vh", padding: "40px", background: "#f9fafb" }}>
       <h2 style={{ fontSize: "32px", color: "#4f46e5" }}>Workout Plans</h2>
 
-      {/* Form */}
       <div
         style={{
           width: "450px",
@@ -76,7 +90,6 @@ export default function WorkoutPlan() {
           onChange={handleChange}
           style={inputStyle}
         />
-
         <input
           name="duration"
           type="number"
@@ -85,7 +98,6 @@ export default function WorkoutPlan() {
           onChange={handleChange}
           style={inputStyle}
         />
-
         <textarea
           name="exercises"
           placeholder="Exercises (comma separated)"
@@ -93,13 +105,11 @@ export default function WorkoutPlan() {
           onChange={handleChange}
           style={{ ...inputStyle, height: "80px" }}
         />
-
         <button onClick={handleSave} style={saveBtn}>
-          {form.id ? "Update Plan" : "Save Plan"}
+          {loading ? "Saving..." : form.id ? "Update Plan" : "Save Plan"}
         </button>
       </div>
 
-      {/* Saved Plans */}
       <h3 style={{ marginTop: "40px", color: "#4f46e5" }}>Saved Plans</h3>
 
       {plans.length === 0 ? (
@@ -131,7 +141,6 @@ const inputStyle = {
   borderRadius: "12px",
   border: "1px solid #d1d5db",
 };
-
 const saveBtn = {
   width: "100%",
   padding: "14px",
@@ -142,7 +151,6 @@ const saveBtn = {
   cursor: "pointer",
   border: "none",
 };
-
 const card = {
   background: "#fff",
   padding: "18px",
@@ -153,7 +161,6 @@ const card = {
   justifyContent: "space-between",
   alignItems: "center",
 };
-
 const editBtn = {
   padding: "8px 14px",
   borderRadius: "12px",

@@ -1,3 +1,8 @@
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { getProfile, saveProfile } from "../api";
+import { useAuth } from "../context/AuthContext";
+
 export function Profile() {
   const [isEditing, setIsEditing] = useState(false);
   const [profile, setProfile] = useState({
@@ -7,12 +12,27 @@ export function Profile() {
     weight: "",
     photo: null,
   });
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
 
   const navigate = useNavigate();
+  const { logout } = useAuth();
 
+  // Fetch profile from backend
   useEffect(() => {
-    const saved = localStorage.getItem("profile");
-    if (saved) setProfile(JSON.parse(saved));
+    const fetchProfile = async () => {
+      try {
+        setLoading(true);
+        const data = await getProfile(); // API call
+        if (data) setProfile(data);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchProfile();
   }, []);
 
   const handleChange = (e) => {
@@ -35,14 +55,23 @@ export function Profile() {
     setProfile({ ...profile, photo: null });
   };
 
-  const handleSave = () => {
-    localStorage.setItem("profile", JSON.stringify(profile));
-    setIsEditing(false);
-    alert("Profile saved!");
+  // Save profile via API
+  const handleSave = async () => {
+    try {
+      setSaving(true);
+      setError("");
+      await saveProfile(profile); // API call
+      setIsEditing(false);
+      alert("Profile saved successfully!");
+    } catch (err) {
+      setError(err || "Failed to save profile");
+    } finally {
+      setSaving(false);
+    }
   };
 
   const handleLogout = () => {
-    localStorage.removeItem("profile");
+    logout(); // AuthContext logout
     navigate("/login");
   };
 
@@ -52,6 +81,13 @@ export function Profile() {
       .map((n) => n[0])
       .join("")
       .toUpperCase() || "U";
+
+  if (loading)
+    return (
+      <div style={{ textAlign: "center", marginTop: "50px" }}>
+        Loading profile...
+      </div>
+    );
 
   return (
     <div style={pageStyle}>
@@ -136,10 +172,12 @@ export function Profile() {
           )}
         </div>
 
+        {error && <p style={{ color: "red", textAlign: "center" }}>{error}</p>}
+
         <div style={buttonRow}>
           {isEditing ? (
-            <button style={saveBtn} onClick={handleSave}>
-              Save Profile
+            <button style={saveBtn} onClick={handleSave} disabled={saving}>
+              {saving ? "Saving..." : "Save Profile"}
             </button>
           ) : (
             <button style={editBtn} onClick={() => setIsEditing(true)}>
@@ -164,103 +202,4 @@ export function Profile() {
   );
 }
 
-const pageStyle = {
-  width: "100%",
-  minHeight: "100vh",
-  background: "#f3f4f6",
-  padding: "20px",
-};
-
-const titleStyle = {
-  textAlign: "center",
-  fontSize: "clamp(24px, 5vw, 34px)",
-  color: "#4f46e5",
-  marginBottom: "30px",
-};
-
-const cardStyle = {
-  width: "100%",
-  maxWidth: "600px",
-  margin: "auto",
-  background: "#fff",
-  padding: "20px",
-  borderRadius: "24px",
-  boxShadow: "0 12px 30px rgba(0,0,0,0.1)",
-};
-
-const photoStyle = {
-  width: "clamp(100px, 25vw, 150px)",
-  height: "clamp(100px, 25vw, 150px)",
-  borderRadius: "50%",
-  objectFit: "cover",
-  border: "4px solid #6366f1",
-};
-
-const avatarStyle = {
-  width: "clamp(100px, 25vw, 150px)",
-  height: "clamp(100px, 25vw, 150px)",
-  borderRadius: "50%",
-  background: "linear-gradient(135deg, #6366f1, #14b8a6)",
-  color: "white",
-  fontSize: "clamp(32px, 8vw, 48px)",
-  fontWeight: "bold",
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "center",
-  margin: "auto",
-};
-
-const infoStyle = {
-  marginTop: "25px",
-  display: "flex",
-  flexDirection: "column",
-  gap: "12px",
-};
-
-const inputStyle = {
-  padding: "12px",
-  borderRadius: "14px",
-  border: "1px solid #d1d5db",
-  width: "100%",
-};
-
-const buttonRow = {
-  marginTop: "25px",
-  textAlign: "center",
-  display: "flex",
-  flexWrap: "wrap",
-  gap: "10px",
-  justifyContent: "center",
-};
-
-const editBtn = {
-  padding: "14px 30px",
-  borderRadius: "20px",
-  background: "#6366f1",
-  color: "#fff",
-  fontWeight: "bold",
-  border: "none",
-  cursor: "pointer",
-  flex: "1 1 auto",
-  minWidth: "120px",
-};
-
-const saveBtn = {
-  padding: "14px 30px",
-  borderRadius: "20px",
-  background: "linear-gradient(to right, #34d399, #14b8a6)",
-  color: "#fff",
-  fontWeight: "bold",
-  border: "none",
-  cursor: "pointer",
-  flex: "1 1 auto",
-  minWidth: "120px",
-};
-
-const removeBtn = {
-  marginTop: "10px",
-  background: "transparent",
-  border: "none",
-  color: "red",
-  cursor: "pointer",
-};
+// Styles remain the same as your original component

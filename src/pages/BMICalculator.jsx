@@ -1,24 +1,37 @@
 import { useEffect, useState } from "react";
+import { createBMI, getLatestBMI } from "../api";
 
 export default function BMICalculator() {
   const [height, setHeight] = useState("");
   const [weight, setWeight] = useState("");
   const [bmi, setBmi] = useState(null);
   const [category, setCategory] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
-  // Load last BMI
+  // Load last BMI from backend
   useEffect(() => {
-    const saved = localStorage.getItem("bmiData");
-    if (saved) {
-      const data = JSON.parse(saved);
-      setHeight(data.height);
-      setWeight(data.weight);
-      setBmi(data.bmi);
-      setCategory(data.category);
-    }
+    const fetchLatestBMI = async () => {
+      try {
+        setLoading(true);
+        const data = await getLatestBMI();
+        if (data) {
+          setHeight(data.height);
+          setWeight(data.weight);
+          setBmi(data.bmi);
+          setCategory(data.category);
+        }
+      } catch (err) {
+        setError(err || "Failed to fetch BMI");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchLatestBMI();
   }, []);
 
-  const calculateBMI = () => {
+  const calculateBMI = async () => {
     if (!height || !weight) return;
 
     const heightMeters = height / 100;
@@ -33,11 +46,16 @@ export default function BMICalculator() {
     setBmi(bmiValue);
     setCategory(bmiCategory);
 
-    localStorage.setItem(
-      "bmiData",
-      JSON.stringify({ height, weight, bmi: bmiValue, category: bmiCategory })
-    );
+    // Save BMI to backend
+    try {
+      await createBMI({ height, weight, bmi: bmiValue, category: bmiCategory });
+    } catch (err) {
+      setError(err || "Failed to save BMI");
+    }
   };
+
+  if (loading) return <div>Loading BMI...</div>;
+  if (error) return <div className="error">{error}</div>;
 
   return (
     <div style={page}>
@@ -78,7 +96,6 @@ export default function BMICalculator() {
 }
 
 /* ---------- Styles ---------- */
-
 const page = {
   width: "100vw",
   minHeight: "100vh",

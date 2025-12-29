@@ -1,4 +1,5 @@
 import axios from "./axios";
+import { getWorkoutPlans, createWorkoutPlan, updateWorkoutPlan } from "../api";
 
 // Get all workout plans
 export const getWorkoutPlans = async () => {

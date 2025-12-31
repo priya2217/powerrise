@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
+import axios from "../api/axios";
 
 export default function Signup() {
   const [name, setName] = useState("");
@@ -8,43 +9,82 @@ export default function Signup() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [terms, setTerms] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
   const navigate = useNavigate();
 
-  const handleSignup = async () => {
-    // Basic validation
+  const handleSignup = async (e) => {
+    e?.preventDefault(); // Prevent form submission if called from form
+
+    // Clear previous errors
+    setError("");
+
+    // Validation
     if (!name || !email || !password || !confirmPassword) {
-      alert("Please fill all fields!");
+      setError("Please fill all fields!");
       return;
     }
+
+    if (!email.includes("@") || !email.includes(".")) {
+      setError("Please enter a valid email address!");
+      return;
+    }
+
+    if (password.length < 6) {
+      setError("Password must be at least 6 characters!");
+      return;
+    }
+
     if (password !== confirmPassword) {
-      alert("Passwords do not match!");
+      setError("Passwords do not match!");
       return;
     }
+
     if (!terms) {
-      alert("You must accept the Terms & Conditions!");
+      setError("You must accept the Terms & Conditions!");
       return;
     }
 
     try {
       setLoading(true);
 
-      const res = await fetch("/api/signup", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, email, password }),
+      console.log("Attempting signup with:", { name, email }); // Debug log
+
+      const response = await axios.post("/auth/signup", {
+        name,
+        email,
+        password,
       });
 
-      const data = await res.json();
+      console.log("Signup response:", response.data); // Debug log
 
-      if (res.ok && data.success) {
-        alert("Account created! You can now log in.");
+      if (response.data.success) {
+        alert("Account created successfully! You can now log in.");
         navigate("/login");
       } else {
-        alert(data.message || "Signup failed!");
+        setError(response.data.message || "Signup failed!");
       }
-    } catch (error) {
-      console.error(error);
-      alert("Something went wrong. Try again!");
+    } catch (err) {
+      console.error("Signup error:", err); // Debug log
+
+      // Detailed error handling
+      if (err.message === "Network error. Please check your connection.") {
+        setError(
+          "Cannot connect to server. Make sure backend is running on http://localhost:5000"
+        );
+      } else if (err.code === "ECONNABORTED") {
+        setError("Request timeout. Server is taking too long to respond.");
+      } else if (err.response) {
+        // Server responded with error
+        const errorMsg = err.response.data?.message || err.response.data?.error;
+        setError(errorMsg || `Server error: ${err.response.status}`);
+      } else if (err.request) {
+        // Request made but no response
+        setError("No response from server. Check if backend is running.");
+      } else {
+        // Other errors
+        setError(err.message || "Something went wrong. Try again!");
+      }
     } finally {
       setLoading(false);
     }
@@ -52,14 +92,21 @@ export default function Signup() {
 
   return (
     <div
-      className="flex items-center justify-center"
-      style={{ width: "100vw", height: "100vh", backgroundColor: "#f0f0f0" }}
+      style={{
+        width: "100vw",
+        height: "100vh",
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+        backgroundColor: "#f0f0f0",
+      }}
     >
       <div
         style={{
           width: "400px",
+          maxWidth: "90%",
           padding: "40px",
-          backgroundColor: "white",
+          backgroundColor: "#ffffff",
           borderRadius: "20px",
           boxShadow: "0 8px 20px rgba(0,0,0,0.1)",
         }}
@@ -76,101 +123,109 @@ export default function Signup() {
           Sign Up
         </h2>
 
-        <input
-          type="text"
-          placeholder="Full Name"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          style={{
-            width: "100%",
-            padding: "12px",
-            marginBottom: "15px",
-            borderRadius: "12px",
-            border: "1px solid #ccc",
-          }}
-        />
-        <input
-          type="email"
-          placeholder="Email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          style={{
-            width: "100%",
-            padding: "12px",
-            marginBottom: "15px",
-            borderRadius: "12px",
-            border: "1px solid #ccc",
-          }}
-        />
-        <input
-          type="password"
-          placeholder="Password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          style={{
-            width: "100%",
-            padding: "12px",
-            marginBottom: "15px",
-            borderRadius: "12px",
-            border: "1px solid #ccc",
-          }}
-        />
-        <input
-          type="password"
-          placeholder="Confirm Password"
-          value={confirmPassword}
-          onChange={(e) => setConfirmPassword(e.target.value)}
-          style={{
-            width: "100%",
-            padding: "12px",
-            marginBottom: "15px",
-            borderRadius: "12px",
-            border: "1px solid #ccc",
-          }}
-        />
+        {error && (
+          <div
+            style={{
+              color: "#ef4444",
+              textAlign: "center",
+              marginBottom: "15px",
+              padding: "12px",
+              backgroundColor: "#fee2e2",
+              borderRadius: "8px",
+              fontSize: "14px",
+              border: "1px solid #fecaca",
+            }}
+          >
+            {error}
+          </div>
+        )}
 
-        <label
-          style={{
-            display: "flex",
-            alignItems: "center",
-            marginBottom: "20px",
-            gap: "8px",
-          }}
-        >
+        <form onSubmit={handleSignup}>
           <input
-            type="checkbox"
-            checked={terms}
-            onChange={(e) => setTerms(e.target.checked)}
-            style={{ width: "16px", height: "16px" }}
+            type="text"
+            placeholder="Full Name"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            disabled={loading}
+            style={inputStyle}
           />
-          <span style={{ fontSize: "14px", color: "#555" }}>
-            I agree to the{" "}
-            <a
-              href="/terms"
-              style={{ color: "#4f46e5", textDecoration: "underline" }}
-            >
-              Terms & Conditions
-            </a>
-          </span>
-        </label>
 
-        <button
-          onClick={handleSignup}
-          disabled={loading}
-          style={{
-            width: "100%",
-            padding: "12px",
-            borderRadius: "20px",
-            background: loading
-              ? "#94f3e4"
-              : "linear-gradient(to right, #34d399, #14b8a6)",
-            color: "white",
-            fontWeight: "bold",
-            cursor: "pointer",
-          }}
-        >
-          {loading ? "Creating account..." : "Sign Up"}
-        </button>
+          <input
+            type="email"
+            placeholder="Email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            disabled={loading}
+            style={inputStyle}
+          />
+
+          <input
+            type="password"
+            placeholder="Password (min 6 characters)"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            disabled={loading}
+            style={inputStyle}
+          />
+
+          <input
+            type="password"
+            placeholder="Confirm Password"
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
+            disabled={loading}
+            style={inputStyle}
+          />
+
+          <label
+            style={{
+              display: "flex",
+              alignItems: "center",
+              marginBottom: "20px",
+              gap: "8px",
+              cursor: loading ? "not-allowed" : "pointer",
+            }}
+          >
+            <input
+              type="checkbox"
+              checked={terms}
+              onChange={(e) => setTerms(e.target.checked)}
+              disabled={loading}
+              style={{ cursor: loading ? "not-allowed" : "pointer" }}
+            />
+            <span style={{ fontSize: "14px", color: "#555" }}>
+              I agree to the{" "}
+              <Link
+                to="/terms"
+                style={{ color: "#4f46e5", textDecoration: "underline" }}
+              >
+                Terms & Conditions
+              </Link>
+            </span>
+          </label>
+
+          <button
+            type="submit"
+            disabled={loading}
+            style={{
+              width: "100%",
+              padding: "12px",
+              borderRadius: "20px",
+              background: loading
+                ? "#94a3b8"
+                : "linear-gradient(to right, #34d399, #14b8a6)",
+              color: "white",
+              fontWeight: "bold",
+              cursor: loading ? "not-allowed" : "pointer",
+              border: "none",
+              marginBottom: "15px",
+              opacity: loading ? 0.7 : 1,
+              transition: "all 0.3s ease",
+            }}
+          >
+            {loading ? "Creating account..." : "Sign Up"}
+          </button>
+        </form>
 
         <p
           style={{
@@ -181,14 +236,42 @@ export default function Signup() {
           }}
         >
           Already have an account?{" "}
-          <a
-            href="/login"
+          <Link
+            to="/login"
             style={{ color: "#4f46e5", textDecoration: "underline" }}
           >
             Login
-          </a>
+          </Link>
         </p>
+
+        {/* Debug info */}
+        <div
+          style={{
+            marginTop: "20px",
+            padding: "10px",
+            backgroundColor: "#f3f4f6",
+            borderRadius: "8px",
+            fontSize: "12px",
+            color: "#666",
+          }}
+        >
+          <strong>Debug Info:</strong>
+          <br />
+          API URL: {import.meta.env.VITE_API_URL || "http://localhost:5000"}
+          <br />
+          Endpoint: /api/auth/signup
+        </div>
       </div>
     </div>
   );
 }
+
+const inputStyle = {
+  width: "100%",
+  padding: "12px",
+  marginBottom: "15px",
+  borderRadius: "12px",
+  border: "1px solid #ccc",
+  boxSizing: "border-box",
+  fontSize: "14px",
+};

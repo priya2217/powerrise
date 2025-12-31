@@ -1,31 +1,19 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
-const bmiSchema = new mongoose.Schema({
-  user: {
+const BMISchema = new mongoose.Schema({
+  userId: {
     type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
     required: true,
-    ref: 'User'
   },
-  height: {
-    type: Number,
-    required: true
-  },
-  weight: {
-    type: Number,
-    required: true
-  },
-  bmi: {
-    type: Number,
-    required: true
-  },
-  category: {
-    type: String,
-    required: true
-  },
+  height: Number,
+  weight: Number,
+  bmi: Number,
+  category: String,
   createdAt: {
     type: Date,
-    default: Date.now
-  }
+    default: Date.now,
+  },
 });
 
-module.exports = mongoose.model('BMI', bmiSchema);
+module.exports = mongoose.model("BMI", BMISchema);

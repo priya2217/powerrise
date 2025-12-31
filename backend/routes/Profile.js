@@ -1,59 +1,87 @@
+// routes/profile.js (Simple version without database)
 const express = require("express");
 const router = express.Router();
-const Profile = require("../models/Profile");
-const { protect } = require("../middleware/auth");
 
-// @route   GET /api/profile
-// @desc    Get user profile
-// @access  Private
-router.get("/", protect, async (req, res) => {
+// In-memory profile storage (for testing only)
+const profiles = [];
+
+// Get user profile (no auth required for testing)
+router.get("/", (req, res) => {
   try {
-    const profile = await Profile.findOne({ user: req.user._id });
+    // For testing, return a default profile if none exists
+    let profile = profiles[0];
 
     if (!profile) {
-      return res.status(404).json({ message: "Profile not found" });
+      // Return default profile
+      profile = {
+        id: "1",
+        userId: "default-user",
+        name: "Guest User",
+        age: 25,
+        height: 170,
+        weight: 70,
+        photo: "",
+        updatedAt: new Date(),
+      };
     }
 
-    res.json(profile);
+    res.json({
+      success: true,
+      profile,
+    });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    console.error("Profile fetch error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Server error",
+    });
   }
 });
 
-// @route   POST /api/profile
-// @desc    Create or update user profile
-// @access  Private
-router.post("/", protect, async (req, res) => {
+// Create or update profile
+router.post("/", (req, res) => {
   try {
     const { name, age, height, weight, photo } = req.body;
 
-    const profileFields = {
-      user: req.user._id,
-      name,
-      age,
-      height,
-      weight,
-      photo,
-      updatedAt: Date.now(),
-    };
-
-    let profile = await Profile.findOne({ user: req.user._id });
+    // Find existing profile or create new one
+    let profile = profiles[0];
 
     if (profile) {
-      // Update
-      profile = await Profile.findOneAndUpdate(
-        { user: req.user._id },
-        { $set: profileFields },
-        { new: true }
-      );
-      return res.json(profile);
+      // Update existing profile
+      profile.name = name || profile.name;
+      profile.age = age || profile.age;
+      profile.height = height || profile.height;
+      profile.weight = weight || profile.weight;
+      profile.photo = photo || profile.photo;
+      profile.updatedAt = new Date();
+    } else {
+      // Create new profile
+      profile = {
+        id: Date.now().toString(),
+        userId: "default-user",
+        name: name || "Guest User",
+        age: age || 0,
+        height: height || 0,
+        weight: weight || 0,
+        photo: photo || "",
+        updatedAt: new Date(),
+      };
+      profiles.push(profile);
     }
 
-    // Create
-    profile = await Profile.create(profileFields);
-    res.status(201).json(profile);
+    console.log("Profile updated:", profile);
+
+    res.json({
+      success: true,
+      message: "Profile updated successfully",
+      profile,
+    });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    console.error("Profile update error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Server error",
+    });
   }
 });
 

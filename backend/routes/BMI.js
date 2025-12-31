@@ -1,59 +1,90 @@
+// routes/bmi.js (Simple version without database)
 const express = require("express");
 const router = express.Router();
-const BMI = require("../models/BMI");
-const { protect } = require("../middleware/auth");
 
-// @route   GET /api/bmi
-// @desc    Get user's BMI history
-// @access  Private
-router.get("/", protect, async (req, res) => {
+// In-memory storage for BMI records
+const bmiRecords = [];
+
+// Get all BMI records
+router.get("/", (req, res) => {
   try {
-    const bmiRecords = await BMI.find({ user: req.user._id }).sort({
-      createdAt: -1,
+    console.log("Fetching all BMI records...");
+    res.json({
+      success: true,
+      count: bmiRecords.length,
+      records: bmiRecords,
     });
-    res.json(bmiRecords);
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    console.error("Error fetching BMI records:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to fetch BMI records",
+    });
   }
 });
 
-// @route   GET /api/bmi/latest
-// @desc    Get user's latest BMI record
-// @access  Private
-router.get("/latest", protect, async (req, res) => {
+// Get latest BMI record
+router.get("/latest", (req, res) => {
   try {
-    const latestBMI = await BMI.findOne({ user: req.user._id }).sort({
-      createdAt: -1,
-    });
-
-    if (!latestBMI) {
-      return res.status(404).json({ message: "No BMI record found" });
+    if (bmiRecords.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: "No BMI records found",
+      });
     }
 
-    res.json(latestBMI);
+    const latest = bmiRecords[bmiRecords.length - 1];
+
+    res.json({
+      success: true,
+      record: latest,
+    });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    console.error("Error fetching latest BMI:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to fetch latest BMI",
+    });
   }
 });
 
-// @route   POST /api/bmi
-// @desc    Create new BMI record
-// @access  Private
-router.post("/", protect, async (req, res) => {
+// Create BMI record
+router.post("/", (req, res) => {
   try {
     const { height, weight, bmi, category } = req.body;
 
-    const bmiRecord = await BMI.create({
-      user: req.user._id,
+    if (!height || !weight || !bmi) {
+      return res.status(400).json({
+        success: false,
+        message: "Please provide height, weight, and BMI",
+      });
+    }
+
+    const newRecord = {
+      id: Date.now().toString(),
+      userId: "default-user",
       height,
       weight,
       bmi,
       category,
-    });
+      createdAt: new Date(),
+    };
 
-    res.status(201).json(bmiRecord);
+    bmiRecords.push(newRecord);
+
+    console.log("BMI record created:", newRecord);
+
+    res.status(201).json({
+      success: true,
+      message: "BMI record created successfully",
+      record: newRecord,
+    });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    console.error("Error creating BMI record:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to create BMI record",
+    });
   }
 });
 

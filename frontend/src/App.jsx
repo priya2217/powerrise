@@ -17,6 +17,7 @@ import BMICalculator from "./pages/BMICalculator";
 import Dashboard from "./pages/Dashboard";
 import Profile from "./pages/Profile";
 import Settings from "./pages/Settings";
+import './App.css'; // Make sure the path is correct
 
 // Protected Route Component
 const ProtectedRoute = ({ children }) => {

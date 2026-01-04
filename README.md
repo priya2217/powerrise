@@ -68,7 +68,7 @@ MONGODB_URI=your_mongodb_connection_string
 1. Clone the repository
 
    ```bash
-   git clone https://github.com/your-username/powerrise.git
+   git clone https://github.com/priya2217/powerrise.git
    ```
 
 2. Navigate to the project directory

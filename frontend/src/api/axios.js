@@ -1,18 +1,18 @@
 import axios from "axios";
 
-// Base URL for your backend
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
+// Backend URL (Render)
+const API_URL =
+  import.meta.env.VITE_API_URL || "https://powerrise.onrender.com/api";
 
-// Create axios instance
 const axiosInstance = axios.create({
-  baseURL: `${API_URL}/api`,
+  baseURL: API_URL,
   headers: {
     "Content-Type": "application/json",
   },
-  timeout: 10000, // Add timeout (10 seconds)
+  timeout: 10000,
 });
 
-// Request interceptor - Add token to every request
+// Attach token automatically
 axiosInstance.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem("token");
@@ -21,43 +21,24 @@ axiosInstance.interceptors.request.use(
     }
     return config;
   },
-  (error) => {
-    return Promise.reject(error);
-  }
+  (error) => Promise.reject(error)
 );
 
-// Response interceptor - Handle errors globally
+// Global error handling
 axiosInstance.interceptors.response.use(
   (response) => response,
   (error) => {
-    // Handle network errors
     if (!error.response) {
-      console.error("Network error:", error.message);
-      return Promise.reject(
-        new Error("Network error. Please check your connection.")
-      );
+      return Promise.reject(new Error("Network error"));
     }
 
-    // Handle 401 Unauthorized
-    if (error.response?.status === 401) {
-      // Token expired or invalid
+    if (error.response.status === 401) {
       localStorage.removeItem("token");
       localStorage.removeItem("user");
 
-      // Only redirect if not already on login page
       if (window.location.pathname !== "/login") {
         window.location.href = "/login";
       }
-    }
-
-    // Handle 403 Forbidden
-    if (error.response?.status === 403) {
-      console.error("Access forbidden");
-    }
-
-    // Handle 500 Server Error
-    if (error.response?.status >= 500) {
-      console.error("Server error occurred");
     }
 
     return Promise.reject(error);

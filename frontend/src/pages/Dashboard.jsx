@@ -11,16 +11,6 @@ import {
 } from "react-icons/fa";
 import { getDashboardStats, getLatestBMI } from "../api";
 import Navbar from "../components/Navbar";
-
-/* ---------------------------------------------------------
-   BIO-CORE :: animated HUD dashboard
-   Design tokens
-   bg        #04070d   panel #0c1420   panel-2 #0a101c
-   cyan      #22e5ff   blue  #3b6fed
-   amber     #ffb020   red   #ff3b5c   mint  #21ffa3
-   display   Orbitron  label Rajdhani  data  "Share Tech Mono"
---------------------------------------------------------- */
-
 const FONT_IMPORT = `@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Rajdhani:wght@500;600;700&family=Share+Tech+Mono&display=swap');`;
 
 function useCountUp(target, duration = 900) {

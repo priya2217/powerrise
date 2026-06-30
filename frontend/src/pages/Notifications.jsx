@@ -8,6 +8,8 @@ import {
 } from "react-icons/fa";
 import Navbar from "../components/Navbar";
 
+const FONT_IMPORT = `@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Rajdhani:wght@500;600;700&family=Share+Tech+Mono&display=swap');`;
+
 const initialNotifications = [
   {
     id: 1,
@@ -58,90 +60,146 @@ export default function Notifications() {
   const unreadCount = notifications.filter((n) => !n.read).length;
 
   return (
-    <div className="min-h-screen bg-[#0b0b14]">
+    <div
+      className="min-h-screen bg-[#04070d] text-slate-200 relative overflow-hidden"
+      style={{ fontFamily: "'Rajdhani', sans-serif" }}
+    >
+      <style>{`
+        ${FONT_IMPORT}
+
+        .hud-mono { font-family: 'Share Tech Mono', monospace; }
+        .hud-display { font-family: 'Orbitron', sans-serif; }
+
+        .hud-grid {
+          background-image:
+            linear-gradient(rgba(34,229,255,0.05) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(34,229,255,0.05) 1px, transparent 1px);
+          background-size: 36px 36px;
+        }
+
+        @keyframes scanline {
+          0% { transform: translateY(-100%); opacity: 0; }
+          10% { opacity: 0.5; }
+          90% { opacity: 0.5; }
+          100% { transform: translateY(100vh); opacity: 0; }
+        }
+        .scanline {
+          position: absolute; left: 0; right: 0; height: 120px;
+          background: linear-gradient(to bottom, transparent, rgba(34,229,255,0.06), transparent);
+          animation: scanline 7s linear infinite;
+          pointer-events: none;
+        }
+
+        @keyframes pulseGlow {
+          0%, 100% { filter: drop-shadow(0 0 2px currentColor); }
+          50% { filter: drop-shadow(0 0 10px currentColor); }
+        }
+        .pulse-glow { animation: pulseGlow 2.4s ease-in-out infinite; }
+
+        @keyframes riseIn {
+          from { opacity: 0; transform: translateY(14px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        .rise-in { animation: riseIn 0.6s cubic-bezier(.2,.7,.3,1) both; }
+
+        .hud-panel {
+          background: linear-gradient(180deg, rgba(13,21,34,0.9), rgba(7,12,20,0.92));
+          border: 1px solid rgba(34,229,255,0.16);
+          clip-path: polygon(0 12px, 12px 0, 100% 0, 100% calc(100% - 12px), calc(100% - 12px) 100%, 0 100%);
+          position: relative;
+        }
+        .hud-panel::before {
+          content: "";
+          position: absolute; inset: 0;
+          background: radial-gradient(120% 60% at 0% 0%, rgba(34,229,255,0.06), transparent 60%);
+          pointer-events: none;
+        }
+      `}</style>
+
+      {/* GRID BACKGROUND */}
+      <div className="hud-grid absolute inset-0 opacity-60" />
+
+      {/* SCANLINE EFFECT */}
+      <div className="scanline" />
+
       <Navbar />
 
-      <div className="max-w-5xl mx-auto p-6">
-        {/* Header */}
-        <div className="mb-8 flex justify-between items-center">
+      <div className="max-w-5xl mx-auto p-6 relative">
+        {/* HEADER (HUD STYLE) */}
+        <div className="hud-panel rise-in p-5 flex justify-between items-center mb-6">
           <div>
-            <h1 className="text-5xl font-extrabold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
-              Notifications
+            <h1 className="hud-display text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 via-sky-300 to-blue-400">
+              NOTIFICATIONS
             </h1>
-
-            <p className="text-gray-400 mt-2">
-              Stay updated with your fitness journey
+            <p className="hud-mono text-xs text-slate-400 tracking-widest mt-1">
+              SYSTEM ALERT STREAM / FITNESS CORE
             </p>
           </div>
 
           {unreadCount > 0 && (
             <button
               onClick={markAllRead}
-              className="px-5 py-3 bg-gradient-to-r from-purple-500 to-pink-500 rounded-xl text-white font-semibold hover:scale-105 transition"
+              className="hud-mono px-4 py-2 border border-cyan-400/30 text-cyan-300 hover:bg-cyan-400/10 hover:border-cyan-300 transition-colors"
+              style={{
+                clipPath:
+                  "polygon(8px 0,100% 0,100% calc(100% - 8px),calc(100% - 8px) 100%,0 100%,0 8px)",
+              }}
             >
-              Mark all as read
+              MARK ALL READ
             </button>
           )}
         </div>
 
-        {/* Stats Card */}
-        <div className="bg-[#14141f] border border-white/5 rounded-3xl p-5 mb-6 shadow-xl shadow-black/30">
-          <div className="flex items-center gap-4">
-            <div className="w-14 h-14 rounded-2xl bg-gradient-to-r from-purple-500 to-pink-500 flex items-center justify-center">
-              <FaBell className="text-white text-xl" />
-            </div>
+        {/* STATS PANEL */}
+        <div className="hud-panel rise-in p-4 mb-6 flex items-center gap-4">
+          <FaBell className="text-cyan-300 text-2xl pulse-glow" />
 
-            <div>
-              <h3 className="text-white text-xl font-bold">
-                {unreadCount} Unread Notifications
-              </h3>
-
-              <p className="text-gray-400">
-                Keep track of your fitness progress
-              </p>
-            </div>
+          <div>
+            <h3 className="hud-display text-xl text-slate-100">
+              {unreadCount} UNREAD SIGNALS
+            </h3>
+            <p className="hud-mono text-xs text-slate-400">
+              Monitoring active fitness events
+            </p>
           </div>
         </div>
 
-        {/* Notification List */}
+        {/* NOTIFICATIONS LIST */}
         <div className="space-y-4">
           {notifications.map((n) => (
             <div
               key={n.id}
-              className={`
-                bg-[#14141f]
-                border
-                rounded-3xl
-                p-5
-                shadow-xl
-                shadow-black/30
-                transition
-                hover:-translate-y-1
-                ${n.read ? "border-white/5" : "border-purple-500/30"}
-              `}
+              className={`hud-panel p-5 flex items-start gap-4 rise-in transition-transform hover:-translate-y-1 ${
+                n.read
+                  ? "border-white/10"
+                  : "border-cyan-400/40 shadow-[0_0_20px_rgba(34,229,255,0.08)]"
+              }`}
             >
-              <div className="flex items-start gap-4">
-                {/* Icon */}
-                <div className="w-14 h-14 rounded-2xl bg-[#1d1d2e] flex items-center justify-center text-xl">
-                  {n.icon}
-                </div>
-
-                {/* Content */}
-                <div className="flex-1">
-                  <div className="flex justify-between items-center mb-2">
-                    <h3 className="text-white font-bold text-lg">{n.title}</h3>
-
-                    <span className="text-gray-500 text-sm">{n.time}</span>
-                  </div>
-
-                  <p className="text-gray-400">{n.message}</p>
-                </div>
-
-                {/* Unread Dot */}
-                {!n.read && (
-                  <div className="w-3 h-3 rounded-full bg-purple-500 animate-pulse mt-2" />
-                )}
+              {/* ICON */}
+              <div className="w-12 h-12 flex items-center justify-center bg-[#0a101c] rounded-lg text-xl shrink-0">
+                {n.icon}
               </div>
+
+              {/* CONTENT */}
+              <div className="flex-1">
+                <div className="flex justify-between items-center">
+                  <h3 className="hud-display text-lg text-slate-100">
+                    {n.title}
+                  </h3>
+                  <span className="hud-mono text-xs text-slate-500">
+                    {n.time}
+                  </span>
+                </div>
+
+                <p className="hud-mono text-sm text-slate-400 mt-1">
+                  {n.message}
+                </p>
+              </div>
+
+              {/* UNREAD SIGNAL */}
+              {!n.read && (
+                <div className="w-2.5 h-2.5 rounded-full bg-cyan-400 animate-pulse mt-2 shadow-[0_0_10px_#22e5ff]" />
+              )}
             </div>
           ))}
         </div>

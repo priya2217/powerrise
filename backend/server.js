@@ -35,6 +35,7 @@ const authRoutes = require("./routes/auth");
 const exerciseRoutes = require("./routes/exercises");
 const profileRoutes = require("./routes/profile");
 const workoutsRoutes = require("./routes/workouts");
+const workoutPlansRoutes = require("./routes/workoutPlans");
 const bmiRoutes = require("./routes/bmi");
 const settingsRoutes = require("./routes/settings");
 const aiChatRoutes = require("./routes/aiChat");
@@ -44,6 +45,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/exercises", exerciseRoutes);
 app.use("/api/profile", profileRoutes);
 app.use("/api/workouts", workoutsRoutes);
+app.use("/api/workout-plans", workoutPlansRoutes);
 app.use("/api/bmi", bmiRoutes);
 app.use("/api/settings", settingsRoutes);
 
@@ -67,8 +69,12 @@ app.get("/", (req, res) => {
       exercises: "GET /api/exercises",
       profile: "GET /api/profile",
       updateProfile: "POST /api/profile",
-      workoutPlans: "GET /api/workouts",
-      createPlan: "POST /api/workouts",
+      logWorkout: "POST /api/workouts",
+      workoutStats: "GET /api/workouts/stats",
+      workoutPlans: "GET /api/workout-plans",
+      createPlan: "POST /api/workout-plans",
+      updatePlan: "PUT /api/workout-plans/:id",
+      deletePlan: "DELETE /api/workout-plans/:id",
       bmi: "GET /api/bmi",
       settings: "GET /api/settings",
     },

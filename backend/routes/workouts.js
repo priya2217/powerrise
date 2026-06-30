@@ -1,7 +1,7 @@
 // routes/workouts.js
 const express = require("express");
 const router = express.Router();
-const Workout = require("../models/Workouts");
+const Workout = require("../models/workouts");
 const auth = require("../middleware/auth");
 
 // Log a completed workout

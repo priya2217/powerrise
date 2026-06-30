@@ -3,8 +3,7 @@ import axios from "./axios";
 // Register new user
 export const signup = async (userData) => {
   try {
-    const response = await axios.post("/auth/signup", userData);
-    return response.data;
+const response = await axios.post("/api/auth/signup", userData);    return response.data;
   } catch (error) {
     throw error.response?.data?.message || "Signup failed";
   }
@@ -13,8 +12,7 @@ export const signup = async (userData) => {
 // Login user
 export const login = async (credentials) => {
   try {
-    const response = await axios.post("/auth/login", credentials);
-
+const response = await axios.post("/api/auth/login", credentials);
     if (response.data.token) {
       localStorage.setItem("token", response.data.token);
       localStorage.setItem("user", JSON.stringify(response.data));

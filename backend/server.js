@@ -43,7 +43,8 @@ app.use("/api/ai-chat", aiChatRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/exercises", exerciseRoutes);
 app.use("/api/profile", profileRoutes);
-app.use("/api/workouts", workoutsRoutes);app.use("/api/bmi", bmiRoutes);
+app.use("/api/workouts", workoutsRoutes);
+app.use("/api/bmi", bmiRoutes);
 app.use("/api/settings", settingsRoutes);
 
 // Test route
@@ -66,8 +67,8 @@ app.get("/", (req, res) => {
       exercises: "GET /api/exercises",
       profile: "GET /api/profile",
       updateProfile: "POST /api/profile",
-      workoutPlans: "GET /api/workout-plans",
-      createPlan: "POST /api/workout-plans",
+      workoutPlans: "GET /api/workouts",
+      createPlan: "POST /api/workouts",
       bmi: "GET /api/bmi",
       settings: "GET /api/settings",
     },

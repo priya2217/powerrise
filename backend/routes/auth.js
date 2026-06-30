@@ -1,10 +1,9 @@
-// routes/auth.js (Simple version without database)
+// routes/auth.js (MongoDB version)
 const express = require("express");
 const router = express.Router();
 const bcrypt = require("bcryptjs");
-
-// In-memory storage (for testing only)
-const users = [];
+const jwt = require("jsonwebtoken");
+const User = require("../models/User");
 
 // Signup Route
 router.post("/signup", async (req, res) => {
@@ -13,7 +12,6 @@ router.post("/signup", async (req, res) => {
 
     console.log("Signup request received:", { name, email });
 
-    // Validation
     if (!name || !email || !password) {
       return res.status(400).json({
         success: false,
@@ -28,8 +26,7 @@ router.post("/signup", async (req, res) => {
       });
     }
 
-    // Check if user already exists
-    const existingUser = users.find((u) => u.email === email);
+    const existingUser = await User.findOne({ email });
     if (existingUser) {
       return res.status(400).json({
         success: false,
@@ -37,28 +34,22 @@ router.post("/signup", async (req, res) => {
       });
     }
 
-    // Hash password
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
 
-    // Create user
-    const user = {
-      id: Date.now().toString(),
+    const user = await User.create({
       name,
       email,
       password: hashedPassword,
-    };
+    });
 
-    users.push(user);
-
-    console.log("User created successfully:", { id: user.id, name, email });
-    console.log("Total users:", users.length);
+    console.log("User created successfully:", { id: user._id, name, email });
 
     res.status(201).json({
       success: true,
       message: "Account created successfully!",
       user: {
-        id: user.id,
+        id: user._id,
         name: user.name,
         email: user.email,
       },
@@ -79,7 +70,6 @@ router.post("/login", async (req, res) => {
 
     console.log("Login request received:", { email });
 
-    // Validation
     if (!email || !password) {
       return res.status(400).json({
         success: false,
@@ -87,8 +77,7 @@ router.post("/login", async (req, res) => {
       });
     }
 
-    // Find user
-    const user = users.find((u) => u.email === email);
+    const user = await User.findOne({ email });
     if (!user) {
       return res.status(400).json({
         success: false,
@@ -96,7 +85,6 @@ router.post("/login", async (req, res) => {
       });
     }
 
-    // Check password
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
       return res.status(400).json({
@@ -105,14 +93,18 @@ router.post("/login", async (req, res) => {
       });
     }
 
+    const token = jwt.sign({ user: { id: user._id } }, process.env.JWT_SECRET, {
+      expiresIn: "7d",
+    });
+
     console.log("Login successful:", { email });
 
     res.json({
       success: true,
       message: "Login successful!",
-      token: "dummy-token-" + user.id,
+      token,
       user: {
-        id: user.id,
+        id: user._id,
         name: user.name,
         email: user.email,
       },

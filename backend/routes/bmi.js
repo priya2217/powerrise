@@ -1,18 +1,22 @@
-// routes/bmi.js (Simple version without database)
+// routes/bmi.js (MongoDB version)
 const express = require("express");
 const router = express.Router();
+const BMI = require("../models/BMI");
+const auth = require("../middleware/auth");
 
-// In-memory storage for BMI records
-const bmiRecords = [];
-
-// Get all BMI records
-router.get("/", (req, res) => {
+// Get all BMI records for the logged-in user
+router.get("/", auth, async (req, res) => {
   try {
-    console.log("Fetching all BMI records...");
+    console.log("Fetching BMI records for user:", req.user.id);
+
+    const records = await BMI.find({ userId: req.user.id }).sort({
+      createdAt: -1,
+    });
+
     res.json({
       success: true,
-      count: bmiRecords.length,
-      records: bmiRecords,
+      count: records.length,
+      records,
     });
   } catch (error) {
     console.error("Error fetching BMI records:", error);
@@ -23,17 +27,19 @@ router.get("/", (req, res) => {
   }
 });
 
-// Get latest BMI record
-router.get("/latest", (req, res) => {
+// Get latest BMI record for the logged-in user
+router.get("/latest", auth, async (req, res) => {
   try {
-    if (bmiRecords.length === 0) {
+    const latest = await BMI.findOne({ userId: req.user.id }).sort({
+      createdAt: -1,
+    });
+
+    if (!latest) {
       return res.status(404).json({
         success: false,
         message: "No BMI records found",
       });
     }
-
-    const latest = bmiRecords[bmiRecords.length - 1];
 
     res.json({
       success: true,
@@ -48,8 +54,8 @@ router.get("/latest", (req, res) => {
   }
 });
 
-// Create BMI record
-router.post("/", (req, res) => {
+// Create BMI record for the logged-in user
+router.post("/", auth, async (req, res) => {
   try {
     const { height, weight, bmi, category } = req.body;
 
@@ -60,17 +66,13 @@ router.post("/", (req, res) => {
       });
     }
 
-    const newRecord = {
-      id: Date.now().toString(),
-      userId: "default-user",
+    const newRecord = await BMI.create({
+      userId: req.user.id,
       height,
       weight,
       bmi,
       category,
-      createdAt: new Date(),
-    };
-
-    bmiRecords.push(newRecord);
+    });
 
     console.log("BMI record created:", newRecord);
 

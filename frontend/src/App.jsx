@@ -5,8 +5,6 @@ import {
   Navigate,
 } from "react-router-dom";
 import { AuthProvider, useAuth } from "./context/AuthContext";
-
-// Import your components
 import Home from "./pages/Home";
 import Login from "./pages/login";
 import Signup from "./pages/signup";
@@ -17,9 +15,11 @@ import BMICalculator from "./pages/BMICalculator";
 import Dashboard from "./pages/Dashboard";
 import Profile from "./pages/Profile";
 import Settings from "./pages/Settings";
-import './App.css'; // Make sure the path is correct
+import AIChatPage from "./pages/AIChatPage";
+import Notifications from "./pages/Notifications";
+import './App.css'; 
 
-// Protected Route Component
+
 const ProtectedRoute = ({ children }) => {
   const { isAuthenticated, loading } = useAuth();
 
@@ -91,6 +91,14 @@ function App() {
               </ProtectedRoute>
             }
           />
+          <Route
+            path="/ai-chat"
+            element={
+              <ProtectedRoute>
+                <AIChatPage />
+              </ProtectedRoute>
+            }
+          />
 
           <Route
             path="/profile"
@@ -100,7 +108,15 @@ function App() {
               </ProtectedRoute>
             }
           />
-
+          <Route
+            path="/notifications"
+            element={
+              <ProtectedRoute>
+                <Notifications />
+              </ProtectedRoute>
+            }
+          />
+          
           <Route
             path="/settings"
             element={

@@ -2,10 +2,17 @@
 const express = require("express");
 const cors = require("cors");
 const dotenv = require("dotenv");
+const mongoose = require("mongoose");
 
 dotenv.config();
 
 const app = express();
+
+// Connect to MongoDB
+mongoose
+  .connect(process.env.MONGO_URI)
+  .then(() => console.log("✅ MongoDB connected successfully"))
+  .catch((err) => console.error("❌ MongoDB connection error:", err));
 
 // Middleware
 app.use(
@@ -27,15 +34,16 @@ app.use((req, res, next) => {
 const authRoutes = require("./routes/auth");
 const exerciseRoutes = require("./routes/exercises");
 const profileRoutes = require("./routes/profile");
-const workoutPlansRoutes = require("./routes/workoutPlans");
+const workoutsRoutes = require("./routes/workouts");
 const bmiRoutes = require("./routes/bmi");
 const settingsRoutes = require("./routes/settings");
+const aiChatRoutes = require("./routes/aiChat");
 
+app.use("/api/ai-chat", aiChatRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/exercises", exerciseRoutes);
 app.use("/api/profile", profileRoutes);
-app.use("/api/workout-plans", workoutPlansRoutes); // FIXED: Changed from /plans to /workout-plans
-app.use("/api/bmi", bmiRoutes);
+app.use("/api/workouts", workoutsRoutes);app.use("/api/bmi", bmiRoutes);
 app.use("/api/settings", settingsRoutes);
 
 // Test route

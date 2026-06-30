@@ -1,172 +1,96 @@
-// routes/workoutPlans.js (Simple version without database)
+// routes/workouts.js
 const express = require("express");
 const router = express.Router();
+const Workout = require("../models/Workout");
+const auth = require("../middleware/auth");
 
-// In-memory storage for workout plans
-const workoutPlans = [
-  {
-    id: "1",
-    userId: "default-user",
-    name: "Beginner Full Body",
-    exercises: [
-      { exercise: "Push-ups", sets: 3, reps: 10, rest: "60s" },
-      { exercise: "Squats", sets: 3, reps: 15, rest: "60s" },
-      { exercise: "Plank", sets: 3, reps: 1, rest: "45s" },
-    ],
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  },
-  {
-    id: "2",
-    userId: "default-user",
-    name: "Cardio Blast",
-    exercises: [
-      { exercise: "Running", sets: 1, reps: 30, rest: "120s" },
-      { exercise: "Jump Rope", sets: 3, reps: 100, rest: "90s" },
-      { exercise: "Cycling", sets: 1, reps: 20, rest: "60s" },
-    ],
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  },
-];
-
-// Get all workout plans
-router.get("/", (req, res) => {
+// Log a completed workout
+router.post("/", auth, async (req, res) => {
   try {
-    console.log("Fetching all workout plans...");
-    res.json({
-      success: true,
-      count: workoutPlans.length,
-      plans: workoutPlans,
-    });
-  } catch (error) {
-    console.error("Error fetching workout plans:", error);
-    res.status(500).json({
-      success: false,
-      message: "Failed to fetch workout plans",
-    });
-  }
-});
+    const { name, duration, calories } = req.body;
 
-// Get workout plan by ID
-router.get("/:id", (req, res) => {
-  try {
-    const plan = workoutPlans.find((p) => p.id === req.params.id);
-
-    if (!plan) {
-      return res.status(404).json({
-        success: false,
-        message: "Workout plan not found",
-      });
-    }
-
-    res.json({
-      success: true,
-      plan,
-    });
-  } catch (error) {
-    console.error("Error fetching workout plan:", error);
-    res.status(500).json({
-      success: false,
-      message: "Failed to fetch workout plan",
-    });
-  }
-});
-
-// Create new workout plan
-router.post("/", (req, res) => {
-  try {
-    const { name, exercises } = req.body;
-
-    if (!name || !exercises) {
+    if (!duration) {
       return res.status(400).json({
         success: false,
-        message: "Please provide name and exercises",
+        message: "Please provide workout duration",
       });
     }
 
-    const newPlan = {
-      id: Date.now().toString(),
-      userId: "default-user",
-      name,
-      exercises,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    };
+    const workout = await Workout.create({
+      userId: req.user.id,
+      name: name || "Workout",
+      duration,
+      calories: calories || 0,
+    });
 
-    workoutPlans.push(newPlan);
-
-    console.log("Workout plan created:", newPlan.name);
+    console.log("Workout logged for user:", req.user.id);
 
     res.status(201).json({
       success: true,
-      message: "Workout plan created successfully",
-      plan: newPlan,
+      message: "Workout logged successfully",
+      workout,
     });
   } catch (error) {
-    console.error("Error creating workout plan:", error);
+    console.error("Workout log error:", error);
     res.status(500).json({
       success: false,
-      message: "Failed to create workout plan",
+      message: "Failed to log workout",
     });
   }
 });
 
-// Update workout plan
-router.put("/:id", (req, res) => {
+// Get dashboard stats: total workouts, calories burned, day streak, avg workout time
+router.get("/stats", auth, async (req, res) => {
   try {
-    const planIndex = workoutPlans.findIndex((p) => p.id === req.params.id);
+    const workouts = await Workout.find({ userId: req.user.id }).sort({
+      completedAt: -1,
+    });
 
-    if (planIndex === -1) {
-      return res.status(404).json({
-        success: false,
-        message: "Workout plan not found",
-      });
+    const totalWorkouts = workouts.length;
+    const caloriesBurned = workouts.reduce(
+      (sum, w) => sum + (w.calories || 0),
+      0,
+    );
+    const avgWorkoutTime =
+      totalWorkouts > 0
+        ? Math.round(
+            workouts.reduce((sum, w) => sum + (w.duration || 0), 0) /
+              totalWorkouts,
+          )
+        : 0;
+
+    // Calculate day streak: count consecutive days (including today) with at least one workout
+    const dateStrings = new Set(
+      workouts.map((w) => new Date(w.completedAt).toDateString()),
+    );
+
+    let streak = 0;
+    let cursor = new Date();
+
+    // if no workout today, streak still counts backward from yesterday
+    if (!dateStrings.has(cursor.toDateString())) {
+      cursor.setDate(cursor.getDate() - 1);
     }
 
-    workoutPlans[planIndex] = {
-      ...workoutPlans[planIndex],
-      ...req.body,
-      updatedAt: new Date(),
-    };
+    while (dateStrings.has(cursor.toDateString())) {
+      streak++;
+      cursor.setDate(cursor.getDate() - 1);
+    }
 
     res.json({
       success: true,
-      message: "Workout plan updated successfully",
-      plan: workoutPlans[planIndex],
+      stats: {
+        totalWorkouts,
+        caloriesBurned,
+        streak,
+        avgWorkoutTime,
+      },
     });
   } catch (error) {
-    console.error("Error updating workout plan:", error);
+    console.error("Stats fetch error:", error);
     res.status(500).json({
       success: false,
-      message: "Failed to update workout plan",
-    });
-  }
-});
-
-// Delete workout plan
-router.delete("/:id", (req, res) => {
-  try {
-    const planIndex = workoutPlans.findIndex((p) => p.id === req.params.id);
-
-    if (planIndex === -1) {
-      return res.status(404).json({
-        success: false,
-        message: "Workout plan not found",
-      });
-    }
-
-    workoutPlans.splice(planIndex, 1);
-
-    res.json({
-      success: true,
-      message: "Workout plan deleted successfully",
-    });
-  } catch (error) {
-    console.error("Error deleting workout plan:", error);
-    res.status(500).json({
-      success: false,
-      message: "Failed to delete workout plan",
+      message: "Failed to fetch stats",
     });
   }
 });

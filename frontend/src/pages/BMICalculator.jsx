@@ -15,14 +15,15 @@ export default function BMICalculator() {
       try {
         setLoading(true);
         const data = await getLatestBMI();
-        if (data) {
-          setHeight(data.height);
-          setWeight(data.weight);
-          setBmi(data.bmi);
-          setCategory(data.category);
+        // backend returns { success, record } or null if none exists
+        if (data && data.record) {
+          setHeight(data.record.height);
+          setWeight(data.record.weight);
+          setBmi(data.record.bmi);
+          setCategory(data.record.category);
         }
       } catch (err) {
-        setError(err || "Failed to fetch BMI");
+        setError(err.toString() || "Failed to fetch BMI");
       } finally {
         setLoading(false);
       }
@@ -45,23 +46,40 @@ export default function BMICalculator() {
 
     setBmi(bmiValue);
     setCategory(bmiCategory);
+    setError("");
 
     // Save BMI to backend
     try {
       await createBMI({ height, weight, bmi: bmiValue, category: bmiCategory });
     } catch (err) {
-      setError(err || "Failed to save BMI");
+      setError(err.toString() || "Failed to save BMI");
     }
   };
 
-  if (loading) return <div>Loading BMI...</div>;
-  if (error) return <div className="error">{error}</div>;
+  if (loading)
+    return (
+      <div style={{ padding: "40px", textAlign: "center" }}>Loading BMI...</div>
+    );
 
   return (
     <div style={page}>
       <h1 style={title}>BMI Calculator</h1>
 
       <div style={card}>
+        {error && (
+          <div
+            style={{
+              background: "#fee2e2",
+              color: "#dc2626",
+              padding: "12px",
+              borderRadius: "10px",
+              fontSize: "14px",
+            }}
+          >
+            {error}
+          </div>
+        )}
+
         <input
           type="number"
           placeholder="Height (cm)"

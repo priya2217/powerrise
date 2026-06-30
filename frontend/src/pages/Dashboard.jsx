@@ -1,284 +1,293 @@
 import { useEffect, useState } from "react";
 import {
-  FaMoon,
-  FaBell,
-  FaUserLock,
-  FaEnvelope,
-  FaVolumeUp,
-  FaSignOutAlt,
-  FaLanguage,
-  FaTrash,
+  FaDumbbell,
+  FaHeartbeat,
+  FaFire,
+  FaTrophy,
+  FaChartLine,
+  FaClock,
 } from "react-icons/fa";
-import { getSettings, saveSettings as saveSettingsAPI } from "../api";
+import { getDashboardStats, getLatestBMI } from "../api";
+import Navbar from "../components/Navbar";
 
-export default function Settings() {
-  const [settings, setSettings] = useState({
-    darkMode: false,
-    notifications: false,
-    publicProfile: true,
-    emailUpdates: true,
-    soundEffects: true,
-    autoLogout: false,
-    language: "English",
-  });
-
-  const [loading, setLoading] = useState(true);
+export default function Dashboard() {
+  const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
+  const [stats, setStats] = useState({
+    totalWorkouts: 0,
+    caloriesBurned: 0,
+    streak: 0,
+    avgWorkoutTime: 0,
+  });
+  const [bmiRecord, setBmiRecord] = useState(null);
 
-  // Fetch settings from backend on mount
   useEffect(() => {
-    const fetchSettings = async () => {
+    const fetchDashboardData = async () => {
       try {
-        setLoading(true);
+        setIsLoading(true);
         setError("");
 
-        const response = await getSettings();
-        console.log("Settings response:", response); // Debug log
+        const [statsRes, bmiRes] = await Promise.allSettled([
+          getDashboardStats(),
+          getLatestBMI(),
+        ]);
 
-        if (response && response.success && response.settings) {
-          setSettings(response.settings);
-        } else if (response && !response.success) {
-          console.log("No settings found, using defaults");
+        if (statsRes.status === "fulfilled" && statsRes.value?.success) {
+          setStats(statsRes.value.stats);
+        }
+
+        if (bmiRes.status === "fulfilled" && bmiRes.value?.record) {
+          setBmiRecord(bmiRes.value.record);
         }
       } catch (err) {
-        console.error("Failed to fetch settings:", err);
-        setError("Failed to load settings");
+        console.error(err);
+        setError("Failed to load dashboard data");
       } finally {
-        setLoading(false);
+        setIsLoading(false);
       }
     };
-    fetchSettings();
+
+    fetchDashboardData();
   }, []);
 
-  // Apply dark mode
-  useEffect(() => {
-    document.body.style.backgroundColor = settings.darkMode
-      ? "#0f172a"
-      : "#f9fafb";
-    document.body.style.color = settings.darkMode ? "#fff" : "#000";
-  }, [settings.darkMode]);
+  const bmi = bmiRecord?.bmi || null;
 
-  const toggle = (key) => {
-    setSettings((prev) => ({ ...prev, [key]: !prev[key] }));
+  const bmiStatus = () => {
+    if (!bmi) return { text: "--", color: "#6b7280" };
+    if (bmi < 18.5) return { text: "Underweight", color: "#f59e0b" };
+    if (bmi < 25) return { text: "Normal", color: "#10b981" };
+    if (bmi < 30) return { text: "Overweight", color: "#f59e0b" };
+    return { text: "Obese", color: "#ef4444" };
   };
 
-  const handleChange = (e) => {
-    setSettings({ ...settings, [e.target.name]: e.target.value });
-  };
+  const status = bmiStatus();
 
-  const saveSettings = async () => {
-    try {
-      setError("");
-      const response = await saveSettingsAPI(settings);
-      console.log("Save response:", response); // Debug log
-
-      if (response && response.success) {
-        alert("Settings saved successfully!");
-      }
-    } catch (err) {
-      console.error("Save error:", err);
-      setError("Failed to save settings");
-      alert("Failed to save settings");
-    }
-  };
-
-  const clearData = async () => {
-    if (window.confirm("This will clear all app data. Continue?")) {
-      localStorage.clear();
-      window.location.reload();
-    }
-  };
-
-  if (loading) {
+  if (isLoading) {
     return (
-      <div style={{ padding: "40px", textAlign: "center" }}>
-        <h2>Loading settings...</h2>
+      <div className="min-h-screen bg-gradient-to-br from-purple-50 to-blue-50">
+        <Navbar />
+        <div
+          className="flex items-center justify-center"
+          style={{ minHeight: "70vh" }}
+        >
+          <div className="text-center">
+            <div className="w-16 h-16 border-4 border-purple-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+            <p className="text-gray-600 text-lg">Loading your dashboard...</p>
+          </div>
+        </div>
       </div>
     );
   }
 
   return (
-    <div style={{ padding: "40px", minHeight: "100vh" }}>
-      <h1
-        style={{
-          fontSize: "32px",
-          fontWeight: "700",
-          color: "#4f46e5",
-          marginBottom: "20px",
-        }}
-      >
-        Settings
-      </h1>
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-pink-50">
+      <Navbar />
 
-      {error && (
-        <div
-          style={{
-            padding: "15px",
-            marginBottom: "20px",
-            background: "#fee2e2",
-            color: "#dc2626",
-            borderRadius: "12px",
-            maxWidth: "400px",
-          }}
-        >
-          {error}
+      <div className="p-6">
+        {/* Header */}
+        <div className="mb-8 animate-slideDown">
+          <h1 className="text-5xl font-extrabold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent mb-2">
+            Dashboard
+          </h1>
+          <p className="text-gray-600 text-lg">
+            Welcome back! Here's your fitness overview
+          </p>
+          {error && <p className="text-sm text-red-500 mt-2">{error}</p>}
         </div>
-      )}
 
-      <SettingRow
-        icon={<FaMoon />}
-        label="Dark Mode"
-        value={settings.darkMode}
-        onClick={() => toggle("darkMode")}
-      />
-
-      <SettingRow
-        icon={<FaBell />}
-        label="Notifications"
-        value={settings.notifications}
-        onClick={() => toggle("notifications")}
-      />
-
-      <SettingRow
-        icon={<FaUserLock />}
-        label="Public Profile"
-        value={settings.publicProfile}
-        onClick={() => toggle("publicProfile")}
-      />
-
-      <SettingRow
-        icon={<FaEnvelope />}
-        label="Email Updates"
-        value={settings.emailUpdates}
-        onClick={() => toggle("emailUpdates")}
-      />
-
-      <SettingRow
-        icon={<FaVolumeUp />}
-        label="Sound Effects"
-        value={settings.soundEffects}
-        onClick={() => toggle("soundEffects")}
-      />
-
-      <SettingRow
-        icon={<FaSignOutAlt />}
-        label="Auto Logout"
-        value={settings.autoLogout}
-        onClick={() => toggle("autoLogout")}
-      />
-
-      {/* Language */}
-      <div style={rowStyle}>
-        <div style={{ display: "flex", gap: "15px", alignItems: "center" }}>
-          <FaLanguage style={{ color: "#4f46e5", fontSize: "22px" }} />
-          <strong>Language</strong>
+        {/* Top Stats Row */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+          <StatCard
+            icon={<FaTrophy />}
+            label="Total Workouts"
+            value={stats.totalWorkouts}
+            gradient="from-yellow-400 to-orange-500"
+            delay="0s"
+          />
+          <StatCard
+            icon={<FaFire />}
+            label="Calories Burned"
+            value={stats.caloriesBurned}
+            gradient="from-red-400 to-pink-500"
+            delay="0.1s"
+          />
+          <StatCard
+            icon={<FaChartLine />}
+            label="Day Streak"
+            value={`${stats.streak} Days`}
+            gradient="from-green-400 to-teal-500"
+            delay="0.2s"
+          />
+          <StatCard
+            icon={<FaClock />}
+            label="Avg Workout"
+            value={`${stats.avgWorkoutTime} min`}
+            gradient="from-blue-400 to-purple-500"
+            delay="0.3s"
+          />
         </div>
-        <select
-          name="language"
-          value={settings.language}
-          onChange={handleChange}
-          style={{
-            padding: "8px",
-            borderRadius: "10px",
-            border: "1px solid #d1d5db",
-          }}
-        >
-          <option>English</option>
-          <option>Tamil</option>
-          <option>Hindi</option>
-        </select>
+
+        {/* Main Content Grid - now 2 columns since Profile moved to navbar */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* BMI & Health Stats */}
+          <div
+            className="bg-white rounded-3xl p-6 shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 animate-slideUp"
+            style={{ animationDelay: "0.4s" }}
+          >
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-12 h-12 bg-gradient-to-br from-green-400 to-teal-500 rounded-full flex items-center justify-center">
+                <FaHeartbeat className="text-white text-xl" />
+              </div>
+              <h3 className="text-2xl font-bold text-gray-800">Health Stats</h3>
+            </div>
+
+            <div className="flex flex-col items-center justify-center py-6">
+              <div className="relative w-40 h-40 mb-4">
+                <svg className="transform -rotate-90 w-40 h-40">
+                  <circle
+                    cx="80"
+                    cy="80"
+                    r="70"
+                    stroke="#e5e7eb"
+                    strokeWidth="12"
+                    fill="none"
+                  />
+                  <circle
+                    cx="80"
+                    cy="80"
+                    r="70"
+                    stroke={status.color}
+                    strokeWidth="12"
+                    fill="none"
+                    strokeDasharray={`${bmi ? (bmi / 40) * 440 : 0} 440`}
+                    className="transition-all duration-1000"
+                  />
+                </svg>
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="text-center">
+                    <p className="text-4xl font-bold text-gray-800">
+                      {bmi || "--"}
+                    </p>
+                    <p className="text-sm text-gray-500">BMI</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="text-center">
+                <p
+                  className="text-2xl font-bold mb-2"
+                  style={{ color: status.color }}
+                >
+                  {status.text}
+                </p>
+                <p className="text-sm text-gray-500">
+                  {bmi ? "Your current BMI status" : "No BMI recorded yet"}
+                </p>
+                {!bmi && (
+                  <button
+                    onClick={() => (window.location = "/bmi")}
+                    className="mt-3 px-5 py-2 bg-gradient-to-r from-green-400 to-teal-500 text-white rounded-full text-sm hover:scale-105 transition-transform"
+                  >
+                    Calculate BMI
+                  </button>
+                )}
+              </div>
+            </div>
+
+            <div className="mt-4 p-4 bg-gradient-to-r from-blue-50 to-purple-50 rounded-2xl">
+              <p className="text-sm text-gray-600 text-center">
+                <FaDumbbell className="inline mr-2" />
+                Keep up the great work! Stay consistent with your workouts.
+              </p>
+            </div>
+          </div>
+
+          {/* Quick Actions */}
+          <div
+            className="bg-white rounded-3xl p-6 shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 animate-slideUp"
+            style={{ animationDelay: "0.5s" }}
+          >
+            <h3 className="text-2xl font-bold text-gray-800 mb-6">
+              Quick Actions
+            </h3>
+
+            <div className="space-y-3">
+              <ActionButton
+                label="Manage Exercises"
+                icon="🏃"
+                gradient="from-green-400 to-teal-500"
+                onClick={() => (window.location = "/exercises")}
+              />
+              <ActionButton
+                label="Workout Plan"
+                icon="🗓"
+                gradient="from-blue-400 to-purple-500"
+                onClick={() => (window.location = "/plan")}
+              />
+              <ActionButton
+                label="Start Timer"
+                icon="⏱"
+                gradient="from-orange-400 to-red-500"
+                onClick={() => (window.location = "/timer")}
+              />
+              <ActionButton
+                label="BMI Calculator"
+                icon="📊"
+                gradient="from-pink-400 to-purple-500"
+                onClick={() => (window.location = "/bmi")}
+              />
+              <ActionButton
+                label="Ask AI Assistant"
+                icon="🤖"
+                gradient="from-indigo-400 to-blue-500"
+                onClick={() => (window.location = "/ai-chat")}
+              />
+            </div>
+          </div>
+        </div>
       </div>
 
-      {/* Save Button */}
-      <button
-        onClick={saveSettings}
-        style={{
-          marginTop: "30px",
-          width: "300px",
-          padding: "14px",
-          borderRadius: "20px",
-          fontWeight: "600",
-          background: "linear-gradient(to right, #34d399, #14b8a6)",
-          color: "#fff",
-          border: "none",
-          cursor: "pointer",
-          fontSize: "16px",
-        }}
-      >
-        Save Settings
-      </button>
-
-      {/* Danger Zone */}
-      <div style={{ marginTop: "40px" }}>
-        <h3 style={{ color: "#ef4444", marginBottom: "15px" }}>Danger Zone</h3>
-        <button
-          onClick={clearData}
-          style={{
-            padding: "14px 20px",
-            borderRadius: "18px",
-            background: "linear-gradient(to right, #ef4444, #dc2626)",
-            color: "#fff",
-            border: "none",
-            cursor: "pointer",
-            width: "300px",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            gap: "10px",
-            fontSize: "16px",
-          }}
-        >
-          <FaTrash /> Clear App Data
-        </button>
-      </div>
+      <style>{`
+        @keyframes slideDown {
+          from { opacity: 0; transform: translateY(-20px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes slideUp {
+          from { opacity: 0; transform: translateY(20px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-slideDown { animation: slideDown 0.6s ease-out; }
+        .animate-slideUp { animation: slideUp 0.6s ease-out both; }
+      `}</style>
     </div>
   );
 }
 
-const rowStyle = {
-  width: "400px",
-  maxWidth: "100%",
-  marginTop: "20px",
-  padding: "18px",
-  borderRadius: "18px",
-  background: "#fff",
-  boxShadow: "0 8px 20px rgba(0,0,0,0.08)",
-  display: "flex",
-  justifyContent: "space-between",
-  alignItems: "center",
-};
-
-function SettingRow({ icon, label, value, onClick }) {
+function StatCard({ icon, label, value, gradient, delay }) {
   return (
-    <div style={{ ...rowStyle, cursor: "pointer" }} onClick={onClick}>
-      <div style={{ display: "flex", gap: "15px", alignItems: "center" }}>
-        <span style={{ fontSize: "22px", color: "#4f46e5" }}>{icon}</span>
-        <strong>{label}</strong>
-      </div>
-
+    <div
+      className="bg-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 animate-slideUp"
+      style={{ animationDelay: delay }}
+    >
       <div
-        style={{
-          width: "46px",
-          height: "24px",
-          borderRadius: "999px",
-          background: value ? "#34d399" : "#d1d5db",
-          position: "relative",
-          transition: "background 0.3s",
-        }}
+        className={`w-12 h-12 bg-gradient-to-r ${gradient} rounded-xl flex items-center justify-center mb-3 text-white text-2xl`}
       >
-        <div
-          style={{
-            width: "20px",
-            height: "20px",
-            borderRadius: "50%",
-            background: "#fff",
-            position: "absolute",
-            top: "2px",
-            left: value ? "24px" : "2px",
-            transition: "all 0.3s",
-          }}
-        />
+        {icon}
       </div>
+      <p className="text-3xl font-bold text-gray-800 mb-1">{value}</p>
+      <p className="text-sm text-gray-500">{label}</p>
     </div>
+  );
+}
+
+function ActionButton({ label, icon, gradient, onClick }) {
+  return (
+    <button
+      onClick={onClick}
+      className={`w-full p-4 bg-gradient-to-r ${gradient} text-white rounded-xl font-semibold hover:scale-105 transition-transform duration-200 flex items-center justify-center gap-3 shadow-lg hover:shadow-xl`}
+    >
+      <span className="text-2xl">{icon}</span>
+      <span>{label}</span>
+    </button>
   );
 }

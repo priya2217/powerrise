@@ -1,277 +1,189 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import axios from "../api/axios";
+import { useAuth } from "../context/AuthContext";
 
-export default function Signup() {
-  const [name, setName] = useState("");
+export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [terms, setTerms] = useState(false);
-  const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const navigate = useNavigate();
+  const { login } = useAuth();
 
-  const handleSignup = async (e) => {
-    e?.preventDefault(); // Prevent form submission if called from form
-
-    // Clear previous errors
-    setError("");
-
-    // Validation
-    if (!name || !email || !password || !confirmPassword) {
+  const handleLogin = async () => {
+    if (!email || !password) {
       setError("Please fill all fields!");
       return;
     }
 
-    if (!email.includes("@") || !email.includes(".")) {
-      setError("Please enter a valid email address!");
-      return;
-    }
-
-    if (password.length < 6) {
-      setError("Password must be at least 6 characters!");
-      return;
-    }
-
-    if (password !== confirmPassword) {
-      setError("Passwords do not match!");
-      return;
-    }
-
-    if (!terms) {
-      setError("You must accept the Terms & Conditions!");
+    if (!/\S+@\S+\.\S+/.test(email)) {
+      setError("Please enter a valid email!");
       return;
     }
 
     try {
       setLoading(true);
+      setError("");
 
-      console.log("Attempting signup with:", { name, email }); // Debug log
+      await login({ email, password });
 
-      const response = await axios.post("/auth/signup", {
-        name,
-        email,
-        password,
-      });
-
-      console.log("Signup response:", response.data); // Debug log
-
-      if (response.data.success) {
-        alert("Account created successfully! You can now log in.");
-        navigate("/login");
-      } else {
-        setError(response.data.message || "Signup failed!");
-      }
+      navigate("/dashboard");
     } catch (err) {
-      console.error("Signup error:", err); // Debug log
-
-      // Detailed error handling
-      if (err.message === "Network error. Please check your connection.") {
-        setError(
-          "Cannot connect to server. Make sure backend is running on http://localhost:5000"
-        );
-      } else if (err.code === "ECONNABORTED") {
-        setError("Request timeout. Server is taking too long to respond.");
-      } else if (err.response) {
-        // Server responded with error
-        const errorMsg = err.response.data?.message || err.response.data?.error;
-        setError(errorMsg || `Server error: ${err.response.status}`);
-      } else if (err.request) {
-        // Request made but no response
-        setError("No response from server. Check if backend is running.");
-      } else {
-        // Other errors
-        setError(err.message || "Something went wrong. Try again!");
-      }
+      setError(err?.message || err || "Login failed");
     } finally {
       setLoading(false);
     }
   };
 
+  const handleKeyPress = (e) => {
+    if (e.key === "Enter") {
+      handleLogin();
+    }
+  };
+
   return (
-    <div
-      style={{
-        width: "100vw",
-        height: "100vh",
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-        backgroundColor: "#f0f0f0",
-      }}
-    >
-      <div
-        style={{
-          width: "400px",
-          maxWidth: "90%",
-          padding: "40px",
-          backgroundColor: "#ffffff",
-          borderRadius: "20px",
-          boxShadow: "0 8px 20px rgba(0,0,0,0.1)",
-        }}
-      >
-        <h2
+    <div style={containerStyle}>
+      <div style={cardStyle}>
+        <h1 style={logoStyle}>⚡ PowerRise</h1>
+
+        <h2 style={titleStyle}>Welcome Back</h2>
+
+        <p style={subtitleStyle}>Login to continue your fitness journey</p>
+
+        {error && <div style={errorStyle}>{error}</div>}
+
+        <input
+          type="email"
+          placeholder="Email Address"
+          value={email}
+          disabled={loading}
+          onChange={(e) => setEmail(e.target.value)}
+          onKeyDown={handleKeyPress}
+          style={inputStyle}
+        />
+
+        <input
+          type="password"
+          placeholder="Password"
+          value={password}
+          disabled={loading}
+          onChange={(e) => setPassword(e.target.value)}
+          onKeyDown={handleKeyPress}
+          style={inputStyle}
+        />
+
+        <button
+          onClick={handleLogin}
+          disabled={loading}
           style={{
-            textAlign: "center",
-            color: "#4f46e5",
-            fontSize: "28px",
-            fontWeight: "800",
-            marginBottom: "20px",
+            ...buttonStyle,
+            opacity: loading ? 0.7 : 1,
           }}
         >
-          Sign Up
-        </h2>
+          {loading ? "Logging in..." : "Login"}
+        </button>
 
-        {error && (
-          <div
-            style={{
-              color: "#ef4444",
-              textAlign: "center",
-              marginBottom: "15px",
-              padding: "12px",
-              backgroundColor: "#fee2e2",
-              borderRadius: "8px",
-              fontSize: "14px",
-              border: "1px solid #fecaca",
-            }}
-          >
-            {error}
-          </div>
-        )}
-
-        <form onSubmit={handleSignup}>
-          <input
-            type="text"
-            placeholder="Full Name"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            disabled={loading}
-            style={inputStyle}
-          />
-
-          <input
-            type="email"
-            placeholder="Email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            disabled={loading}
-            style={inputStyle}
-          />
-
-          <input
-            type="password"
-            placeholder="Password (min 6 characters)"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            disabled={loading}
-            style={inputStyle}
-          />
-
-          <input
-            type="password"
-            placeholder="Confirm Password"
-            value={confirmPassword}
-            onChange={(e) => setConfirmPassword(e.target.value)}
-            disabled={loading}
-            style={inputStyle}
-          />
-
-          <label
-            style={{
-              display: "flex",
-              alignItems: "center",
-              marginBottom: "20px",
-              gap: "8px",
-              cursor: loading ? "not-allowed" : "pointer",
-            }}
-          >
-            <input
-              type="checkbox"
-              checked={terms}
-              onChange={(e) => setTerms(e.target.checked)}
-              disabled={loading}
-              style={{ cursor: loading ? "not-allowed" : "pointer" }}
-            />
-            <span style={{ fontSize: "14px", color: "#555" }}>
-              I agree to the{" "}
-              <Link
-                to="/terms"
-                style={{ color: "#4f46e5", textDecoration: "underline" }}
-              >
-                Terms & Conditions
-              </Link>
-            </span>
-          </label>
-
-          <button
-            type="submit"
-            disabled={loading}
-            style={{
-              width: "100%",
-              padding: "12px",
-              borderRadius: "20px",
-              background: loading
-                ? "#94a3b8"
-                : "linear-gradient(to right, #34d399, #14b8a6)",
-              color: "white",
-              fontWeight: "bold",
-              cursor: loading ? "not-allowed" : "pointer",
-              border: "none",
-              marginBottom: "15px",
-              opacity: loading ? 0.7 : 1,
-              transition: "all 0.3s ease",
-            }}
-          >
-            {loading ? "Creating account..." : "Sign Up"}
-          </button>
-        </form>
-
-        <p
-          style={{
-            textAlign: "center",
-            fontSize: "14px",
-            color: "#777",
-            marginTop: "15px",
-          }}
-        >
-          Already have an account?{" "}
-          <Link
-            to="/login"
-            style={{ color: "#4f46e5", textDecoration: "underline" }}
-          >
-            Login
+        <p style={footerStyle}>
+          Don't have an account?{" "}
+          <Link to="/signup" style={linkStyle}>
+            Sign Up
           </Link>
         </p>
-
-        {/* Debug info */}
-        <div
-          style={{
-            marginTop: "20px",
-            padding: "10px",
-            backgroundColor: "#f3f4f6",
-            borderRadius: "8px",
-            fontSize: "12px",
-            color: "#666",
-          }}
-        >
-          <strong>Debug Info:</strong>
-          <br />
-          API URL: {import.meta.env.VITE_API_URL || "http://localhost:5000"}
-          <br />
-          Endpoint: /api/auth/signup
-        </div>
       </div>
     </div>
   );
 }
 
+/* ---------- Styles ---------- */
+
+const containerStyle = {
+  width: "100vw",
+  height: "100vh",
+  background: "linear-gradient(135deg, #0b0b14 0%, #14141f 50%, #1b1b29 100%)",
+  display: "flex",
+  justifyContent: "center",
+  alignItems: "center",
+};
+
+const cardStyle = {
+  width: "420px",
+  maxWidth: "90%",
+  background: "#14141f",
+  padding: "40px",
+  borderRadius: "20px",
+  border: "1px solid rgba(255,255,255,0.08)",
+  boxShadow: "0 15px 40px rgba(0,0,0,0.5)",
+};
+
+const logoStyle = {
+  textAlign: "center",
+  color: "#6366f1",
+  fontSize: "32px",
+  marginBottom: "10px",
+};
+
+const titleStyle = {
+  textAlign: "center",
+  color: "#ffffff",
+  fontSize: "28px",
+  fontWeight: "700",
+  marginBottom: "8px",
+};
+
+const subtitleStyle = {
+  textAlign: "center",
+  color: "#9494ab",
+  marginBottom: "30px",
+  fontSize: "14px",
+};
+
+const errorStyle = {
+  background: "rgba(239,68,68,0.15)",
+  border: "1px solid rgba(239,68,68,0.3)",
+  color: "#f87171",
+  padding: "12px",
+  borderRadius: "10px",
+  marginBottom: "20px",
+  textAlign: "center",
+  fontSize: "14px",
+};
+
 const inputStyle = {
   width: "100%",
-  padding: "12px",
-  marginBottom: "15px",
+  padding: "14px",
+  marginBottom: "18px",
   borderRadius: "12px",
-  border: "1px solid #ccc",
+  border: "1px solid rgba(255,255,255,0.1)",
+  background: "#1b1b29",
+  color: "#ffffff",
+  fontSize: "15px",
+  outline: "none",
   boxSizing: "border-box",
+};
+
+const buttonStyle = {
+  width: "100%",
+  padding: "14px",
+  borderRadius: "12px",
+  border: "none",
+  background: "linear-gradient(to right, #6366f1, #4f46e5)",
+  color: "#fff",
+  fontSize: "16px",
+  fontWeight: "700",
+  cursor: "pointer",
+  marginTop: "10px",
+};
+
+const footerStyle = {
+  textAlign: "center",
+  marginTop: "25px",
+  color: "#9494ab",
   fontSize: "14px",
+};
+
+const linkStyle = {
+  color: "#6366f1",
+  textDecoration: "none",
+  fontWeight: "600",
 };

@@ -2,6 +2,14 @@ import { useEffect, useState } from "react";
 import { FaBell, FaDumbbell } from "react-icons/fa";
 import { getProfile } from "../api";
 
+/* ---------------------------------------------------------
+   NAVBAR :: HUD theme, matches Dashboard / ExerciseLibrary / WorkoutPlan
+   bg #04070d  panel #0c1420  cyan #22e5ff  blue #3b6fed
+   display Orbitron  label Rajdhani  data Share Tech Mono
+--------------------------------------------------------- */
+
+const FONT_IMPORT = `@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Rajdhani:wght@500;600;700&family=Share+Tech+Mono&display=swap');`;
+
 export default function Navbar() {
   const [profile, setProfile] = useState(null);
 
@@ -27,8 +35,127 @@ export default function Navbar() {
       .toUpperCase() || "U";
 
   return (
-    <div style={navStyle}>
+    <div className="hud-nav" style={{ fontFamily: "'Rajdhani', sans-serif" }}>
+      <style>{`
+        ${FONT_IMPORT}
+
+        .hud-mono { font-family: 'Share Tech Mono', monospace; }
+        .hud-display { font-family: 'Orbitron', sans-serif; }
+
+        .hud-nav {
+          width: 100%;
+          padding: 14px 30px;
+          background: rgba(7,12,20,0.85);
+          backdrop-filter: blur(20px);
+          border-bottom: 1px solid rgba(34,229,255,0.16);
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          box-sizing: border-box;
+          position: sticky;
+          top: 0;
+          z-index: 50;
+        }
+
+        .hud-logo-icon {
+          width: 32px;
+          height: 32px;
+          border-radius: 4px;
+          background: linear-gradient(135deg, rgba(34,229,255,0.25), rgba(59,111,237,0.25));
+          border: 1px solid rgba(34,229,255,0.4);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          transition: box-shadow 0.2s ease, transform 0.2s ease;
+        }
+        .hud-logo-group:hover .hud-logo-icon {
+          box-shadow: 0 0 14px rgba(34,229,255,0.35);
+          transform: translateY(-1px);
+        }
+
+        .hud-logo-text {
+          font-family: 'Orbitron', sans-serif;
+          font-weight: 700;
+          font-size: 17px;
+          letter-spacing: 0.08em;
+          background: linear-gradient(to right, #22e5ff, #3b6fed);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+        }
+
+        @keyframes blink {
+          0%, 100% { opacity: 1; } 50% { opacity: 0.25; }
+        }
+        .hud-pulse-dot { animation: blink 1.8s ease-in-out infinite; }
+
+        .hud-bell-btn {
+          background: #0a101c;
+          border: 1px solid rgba(34,229,255,0.2);
+          width: 38px;
+          height: 38px;
+          border-radius: 4px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          cursor: pointer;
+          color: #aef3ff;
+          transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.15s ease;
+          clip-path: polygon(6px 0,100% 0,100% calc(100% - 6px),calc(100% - 6px) 100%,0 100%,0 6px);
+        }
+        .hud-bell-btn:hover {
+          border-color: rgba(34,229,255,0.55);
+          box-shadow: 0 0 12px rgba(34,229,255,0.25);
+          transform: translateY(-1px);
+        }
+
+        .hud-profile-group {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          cursor: pointer;
+          padding: 4px 10px 4px 4px;
+          border-radius: 999px;
+          border: 1px solid transparent;
+          transition: border-color 0.2s ease, background 0.2s ease;
+        }
+        .hud-profile-group:hover {
+          border-color: rgba(34,229,255,0.3);
+          background: rgba(34,229,255,0.05);
+        }
+
+        .hud-avatar {
+          width: 34px;
+          height: 34px;
+          border-radius: 50%;
+          background: linear-gradient(135deg, #22e5ff, #3b6fed);
+          color: #03141c;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-family: 'Share Tech Mono', monospace;
+          font-size: 13px;
+          font-weight: 700;
+          border: 1px solid rgba(34,229,255,0.5);
+        }
+
+        .hud-avatar-img {
+          width: 34px;
+          height: 34px;
+          border-radius: 50%;
+          object-fit: cover;
+          border: 1px solid rgba(34,229,255,0.5);
+        }
+
+        .hud-name {
+          font-size: 13px;
+          font-weight: 600;
+          color: #d6e9f8;
+          letter-spacing: 0.02em;
+        }
+      `}</style>
+
       <div
+        className="hud-logo-group"
         style={{
           display: "flex",
           alignItems: "center",
@@ -37,110 +164,36 @@ export default function Navbar() {
         }}
         onClick={() => (window.location = "/dashboard")}
       >
-        <div style={logoIconStyle}>
-          <FaDumbbell color="#fff" size={16} />
+        <div className="hud-logo-icon">
+          <FaDumbbell color="#aef3ff" size={15} />
         </div>
-        <span style={logoTextStyle}>PowerRise</span>
+        <span className="hud-logo-text">NeuroFit</span>
       </div>
 
-      <div style={{ display: "flex", alignItems: "center", gap: "20px" }}>
+      <div style={{ display: "flex", alignItems: "center", gap: "18px" }}>
         <button
           onClick={() => (window.location = "/notifications")}
-          style={bellButtonStyle}
+          className="hud-bell-btn"
           title="Notifications"
         >
-          <FaBell size={18} />
+          <FaBell size={16} />
         </button>
 
         <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: "10px",
-            cursor: "pointer",
-          }}
+          className="hud-profile-group"
           onClick={() => (window.location = "/profile")}
           title="Go to profile"
         >
           {profile?.photo ? (
-            <img src={profile.photo} alt="Profile" style={avatarImgStyle} />
+            <img src={profile.photo} alt="Profile" className="hud-avatar-img" />
           ) : (
-            <div style={avatarStyle}>{initials}</div>
+            <div className="hud-avatar">{initials}</div>
           )}
-          <span style={nameStyle}>{profile?.name || "Guest User"}</span>
+          <span className="hud-name hud-mono">
+            {profile?.name || "GUEST USER"}
+          </span>
         </div>
       </div>
     </div>
   );
 }
-
-const navStyle = {
-  width: "100%",
-  padding: "14px 24px",
-  background: "#fff",
-  boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "space-between",
-  boxSizing: "border-box",
-  position: "sticky",
-  top: 0,
-  zIndex: 50,
-};
-
-const logoIconStyle = {
-  width: "32px",
-  height: "32px",
-  borderRadius: "10px",
-  background: "linear-gradient(135deg, #8b5cf6, #ec4899)",
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "center",
-};
-
-const logoTextStyle = {
-  fontWeight: "800",
-  fontSize: "18px",
-  background: "linear-gradient(to right, #7c3aed, #db2777)",
-  WebkitBackgroundClip: "text",
-  WebkitTextFillColor: "transparent",
-};
-
-const bellButtonStyle = {
-  background: "#f3f4f6",
-  border: "none",
-  width: "38px",
-  height: "38px",
-  borderRadius: "50%",
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "center",
-  cursor: "pointer",
-  color: "#4b5563",
-};
-
-const avatarStyle = {
-  width: "36px",
-  height: "36px",
-  borderRadius: "50%",
-  background: "linear-gradient(135deg, #8b5cf6, #ec4899)",
-  color: "#fff",
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "center",
-  fontSize: "14px",
-  fontWeight: "700",
-};
-
-const avatarImgStyle = {
-  width: "36px",
-  height: "36px",
-  borderRadius: "50%",
-  objectFit: "cover",
-};
-
-const nameStyle = {
-  fontSize: "14px",
-  fontWeight: "600",
-  color: "#374151",
-};

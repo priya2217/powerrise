@@ -1,8 +1,12 @@
 import axios from "axios";
 
-// Backend URL (Render)
-const API_URL =
+// Backend URL. API modules use paths like /auth/signup, so the base URL must
+// include /api whether it comes from local .env or the production fallback.
+const rawApiUrl =
   import.meta.env.VITE_API_URL || "https://powerrise.onrender.com/api";
+const API_URL = rawApiUrl.replace(/\/$/, "").endsWith("/api")
+  ? rawApiUrl.replace(/\/$/, "")
+  : `${rawApiUrl.replace(/\/$/, "")}/api`;
 
 const axiosInstance = axios.create({
   baseURL: API_URL,

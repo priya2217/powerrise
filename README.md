@@ -1,139 +1,158 @@
-# ⚡ PowerRise
+# 🚀 NeuroFit – AI-Powered Fitness Intelligence System
 
-PowerRise is a web-based application designed to manage and monitor power-related data efficiently. The project focuses on secure backend configuration, API-based architecture, and scalable data handling. It is built using modern web technologies and follows clean project structuring practices.
+NeuroFit is a full-stack fitness tracking application designed with a futuristic **cyberpunk-inspired UI** and an intelligent system approach. It combines fitness tracking, real-time analytics, and AI-powered assistance to deliver a personalized and adaptive health experience.
 
----
-
-## 🚀 Features
-
-* Secure backend configuration using environment variables
-* RESTful API architecture
-* Middleware-based request handling
-* Centralized configuration management
-* Database integration for storing and retrieving power-related data
-* Error handling and logging
+Built using the MERN stack, NeuroFit follows a modular and scalable architecture with a focus on clean API design and user-centric performance.
 
 ---
 
-## 🛠 Tech Stack
+# 💡 Key Features
 
-**Backend:**
+* 📊 Real-time fitness dashboard with analytics and progress tracking
+* 🏋️ Workout management with full **CRUD operations**
+* 🔁 Streak tracking and performance monitoring
+* 🔥 Calorie tracking and workout insights
+* 🧠 AI-powered assistant using **LLM-based integration for contextual fitness guidance**
+* ⚖️ BMI calculation and health status evaluation
+* 🔐 Secure REST API architecture
+* 🎨 Responsive futuristic UI (cyberpunk / HUD-inspired design)
+
+---
+
+# 🛠 Tech Stack
+
+## Frontend
+
+* React.js
+* Tailwind CSS
+* React Icons
+
+## Backend
 
 * Node.js
 * Express.js
 
-**Database:**
+## Database
 
 * MongoDB
+* Mongoose
 
-**Other Tools & Libraries:**
+## AI Integration
 
-* Mongoose (ODM)
-* dotenv (Environment variable management)
-* CORS (Cross-Origin Resource Sharing)
-* Middleware-based request processing
+* LLM-based inference API (cloud-hosted model integration)
 
----
+## Other Tools
 
-## 📂 Project Structure
-
-```
-powerrise/
-│── config/          # Database & environment configuration
-│── middleware/      # Custom middleware functions
-│── models/          # Database schemas (Mongoose models)
-│── routes/          # API route definitions
-│── .env.example     # Sample environment variables
-│── server.js        # Application entry point
-│── package.json     # Project dependencies
-```
+* Axios
+* dotenv
+* CORS
+* Middleware-based architecture
 
 ---
 
-## ⚙️ Environment Variables
+neurofit/
+│
+├── backend/                 # Backend (Node + Express)
+│   ├── config/             # Database configuration
+│   ├── middleware/         # Custom middleware
+│   ├── models/             # Mongoose schemas
+│   ├── routes/            # API endpoints
+│   ├── server.js          # Entry point
+│   ├── .env               # Environment variables
+│   ├── package.json
+│
+├── frontend/               # Frontend (React + Vite)
+│   ├── public/
+│   ├── src/
+│   │   ├── api/           # API calls
+│   │   ├── assets/        # Images & static files
+│   │   ├── components/    # Reusable components
+│   │   ├── context/       # Context API (Auth etc.)
+│   │   ├── pages/         # Pages (Dashboard, Login, etc.)
+│   │   ├── App.jsx
+│   │   ├── main.jsx
+│   │   ├── index.css
+│   ├── .env
+│   ├── package.json
+│
+├── README.md
 
-Create a `.env` file in the root directory and add the following:
+# ⚙️ Environment Variables
 
-```
+Create a `.env` file in the backend:
+
 PORT=5000
 MONGODB_URI=your_mongodb_connection_string
+JWT_SECRET=your_secret_key
+
+---
+
+# ▶️ Installation & Setup
+
+```bash
+git clone https://github.com/priya2217/NeuroFit.git
+cd NeuroFit
+npm install
+npm run dev
 ```
 
-> ⚠️ Note: The `.env` file is excluded from version control for security reasons.
+Backend runs at:
+[http://localhost:5000](http://localhost:5000)
 
 ---
 
-## ▶️ Installation & Run
+# 🧠 Architecture Overview
 
-1. Clone the repository
+NeuroFit is designed using a modular backend architecture:
 
-   ```bash
-   git clone https://github.com/priya2217/powerrise.git
-   ```
+* **Models** → Database schema design
+* **Routes** → API endpoint handling
+* **Middleware** → Authentication & request processing
+* **Config** → Environment & database setup
 
-2. Navigate to the project directory
-
-   ```bash
-   cd powerrise
-   ```
-
-3. Install dependencies
-
-   ```bash
-   npm install
-   ```
-
-4. Start the server
-
-   ```bash
-   npm start
-   ```
-
-The application will run on `http://localhost:5000`
+This structure ensures scalability, maintainability, and clean separation of concerns.
 
 ---
 
-## 🧠 Architecture Overview
+# 🎯 Objective
 
-PowerRise follows a **modular backend architecture**:
-
-* **Models** handle database structure
-* **Routes** define API endpoints
-* **Middleware** manages request validation and security
-* **Config** handles database connection and environment setup
-
-This structure improves scalability, maintainability, and readability.
+The goal of NeuroFit is to combine fitness tracking with intelligent AI assistance, creating a more **adaptive, interactive, and data-driven fitness experience**.
 
 ---
 
-## 📌 Use Case
+# 🚀 Future Improvements
 
-PowerRise can be extended for:
-
-* Power consumption monitoring
-* Energy management dashboards
-* Admin-based power analytics systems
-
----
-
-## 👩‍💻 Developer Notes
-
-* The project does not use a traditional Controller-View structure.
-* Business logic is handled through **routes and middleware**.
-* Designed for easy deployment on platforms like **Vercel / Render**.
+* Real-time AI personalization improvements
+* Advanced workout recommendation engine
+* Mobile app integration
+* Enhanced analytics dashboard
+* Social fitness tracking features
 
 ---
 
-## 📄 License
+# 👨‍💻 Developer Notes
 
-This project is for educational and learning purposes.
-
----
-
-## ✨ Author
-
-**Priya K**
+* Built as a full-stack MERN project
+* Designed with scalability and AI integration in mind
+* UI inspired by futuristic HUD / cyberpunk systems
+* Ready for deployment on Vercel / Render
 
 ---
 
-If you like this project, feel free to ⭐ the repository!
+# 📌 License
+
+This project is for educational and portfolio purposes.
+
+---
+
+# ✨ Author
+
+Priya K
+
+---
+
+# ⭐ Support
+
+If you like this project, please consider giving it a ⭐ on GitHub.
+✔ or help you **deploy NeuroFit live (Render + Vercel)**
+✔ or make your project go **viral on LinkedIn post style** 🚀
